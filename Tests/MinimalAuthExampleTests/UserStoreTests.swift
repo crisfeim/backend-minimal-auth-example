@@ -1,6 +1,7 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 21/6/25.
 
 import XCTest
+import MinimalAuthExample
 
 class UserStoreTests: XCTestCase {
     override func setUp() {

@@ -2,7 +2,7 @@
 
 import Foundation
 
-public class CodableUserStore {
+public class CodableUserStore: UserStore {
     private let storeURL: URL
     public init(storeURL: URL) {
         self.storeURL = storeURL

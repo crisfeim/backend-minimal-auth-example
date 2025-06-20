@@ -20,10 +20,22 @@ class UserStoreTests: XCTestCase {
     
     func test_saveUser_savesUser() throws {
         let sut = CodableUserStore(storeURL: testSpecificURL())
-        let user = User(id: UUID())
+        let user = anyUser()
         try sut.saveUser(user)
         let users = try sut.get()
         XCTAssertEqual(users, [user])
+    }
+    
+    func test_findUserByEmail_returnsUserIfExists() throws {
+        let sut = CodableUserStore(storeURL: testSpecificURL())
+        let user = User(id: UUID(), email: "hi@crisfe.im")
+        try sut.saveUser(user)
+        let foundUser = try sut.findUser(byEmail: "hi@crisfe.im")
+        XCTAssertEqual(foundUser, user)
+    }
+    
+    private func anyUser() -> User {
+        User(id: UUID(), email: "any@email.com")
     }
     
     private func cachesDirectory() -> URL {

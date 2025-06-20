@@ -19,7 +19,11 @@ enum Entrypoint {
         // app.logger.debug("Tried to install SwiftNIO's EventLoopGroup as Swift's global concurrency executor", metadata: ["success": .stringConvertible(executorTakeoverSuccess)])
         
         do {
-            try await configure(app)
+            let userStoreURL = cachesDirectory()
+                .appendingPathComponent("minimal-auth-example")
+                .appendingPathComponent("users.json")
+            
+            try await configure(app, userStore: CodableUserStore(storeURL: userStoreURL))
             try await app.execute()
         } catch {
             app.logger.report(error: error)
@@ -28,4 +32,8 @@ enum Entrypoint {
         }
         try await app.asyncShutdown()
     }
+}
+
+private func cachesDirectory() -> URL {
+    return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
 }

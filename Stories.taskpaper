@@ -24,4 +24,4 @@ Post recipes sad path:
     - System delivers error on invalid access token @done
     - System delivers error on store error @done
 Post recipes happy path:
-    - Sysyem delivers recipe on succesful creation
+    - Sysyem delivers recipe on succesful creation @done

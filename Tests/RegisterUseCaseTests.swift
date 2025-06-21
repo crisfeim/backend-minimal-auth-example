@@ -35,18 +35,28 @@ class RegisterUseCaseTests: XCTestCase {
         }
     }
     
+    typealias EmailValidator  = (_ email: String) -> Bool
+    
     class RecipesApp {
         let store: UserStore
+        let emailValidator: EmailValidator
         
-        init(store: UserStore) {
+        init(store: UserStore, emailValidator: @escaping EmailValidator) {
             self.store = store
+            self.emailValidator = emailValidator
         }
         
         struct UserAlreadyExists: Error {}
+        struct InvalidEmailError: Error {}
         func register(email: String, password: String) throws {
             guard try store.findUser(byEmail: email) == nil else {
                 throw UserAlreadyExists()
             }
+            
+            guard emailValidator(email) else {
+                throw InvalidEmailError()
+            }
+            
             try store.saveUser(User(id: UUID(), email: email, hashedPassword: password))
         }
     }
@@ -74,9 +84,18 @@ class RegisterUseCaseTests: XCTestCase {
         let sut = makeSUT(store: store)
         XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password"))
     }
+    
+    func test_register_deliversErrorOnInvalidEmail() throws {
+        let store = UserStoreStub(
+            findUserResult: .success(nil),
+            saveResult: .success(())
+        )
+        let sut = makeSUT(store: store, emailValidator: { _ in false })
+        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password"))
+    }
 
-    func makeSUT(store: UserStore) -> RecipesApp {
-        return RecipesApp(store: store)
+    func makeSUT(store: UserStore, emailValidator: @escaping EmailValidator = { _ in true}) -> RecipesApp {
+        return RecipesApp(store: store, emailValidator: emailValidator)
     }
     
     func anyError() -> NSError {

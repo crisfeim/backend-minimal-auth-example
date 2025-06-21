@@ -21,7 +21,6 @@ Get recipes sad path:
 Get recipes happy path:
     - System delivers user recipes @done
 Post recipes sad path:
-    - System delivers error on invalid access token
-    - System delivers error on malformed payload
+    - System delivers error on invalid access token @done
     - System delivers error on store error @done
 

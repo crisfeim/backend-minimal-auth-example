@@ -9,10 +9,7 @@ public typealias AuthTokenVerifier = (_ token: String) async throws -> UUID
 public typealias Hasher = (_ input: String) async throws -> String
 public typealias PasswordVerifier = (_ password: String, _ hash: String) async throws -> Bool
 
-public protocol RecipeStore {
-    func getRecipes() throws -> [Recipe]
-    func createRecipe(userId: UUID, title: String) throws -> Recipe
-}
+
 
 public class RecipesApp {
     private let userStore: UserStore

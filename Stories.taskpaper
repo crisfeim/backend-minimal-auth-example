@@ -1,5 +1,5 @@
 Register sad path:
-    - System delivers error on user store saving error
+    - System delivers error on user store saving error @done
     - System delivers error on already existent user
 Register happy path:
     - System delivers valid token

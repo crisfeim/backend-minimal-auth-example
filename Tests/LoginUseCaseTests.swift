@@ -33,6 +33,14 @@ class LoginUseCaseTests: XCTestCase {
         }
     }
     
+    func test_login_deliversErrorOnInvalidPassword() throws {
+        let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
+        let sut = makeSUT(store: store, passwordValidator: { _ in false })
+        XCTAssertThrowsError(try sut.login(email: "any-email", password: "any-password")) { error in
+            XCTAssertTrue(error is RecipesApp.InvalidPasswordError)
+        }
+    }
+    
     func makeSUT(
         store: UserStore,
         emailValidator: @escaping EmailValidator = { _ in true },

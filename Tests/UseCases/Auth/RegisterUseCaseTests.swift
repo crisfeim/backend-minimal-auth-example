@@ -26,7 +26,7 @@ class RegisterUseCaseTests: XCTestCase {
         )
         let sut = makeSUT(store: store)
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RecipesApp.UserAlreadyExists)
+            XCTAssertTrue(error is AppCoordinator.UserAlreadyExists)
         }
     }
     
@@ -38,7 +38,7 @@ class RegisterUseCaseTests: XCTestCase {
         let sut = makeSUT(store: store, emailValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
             
-            XCTAssertTrue(error is RecipesApp.InvalidEmailError)
+            XCTAssertTrue(error is AppCoordinator.InvalidEmailError)
         }
     }
     
@@ -49,7 +49,7 @@ class RegisterUseCaseTests: XCTestCase {
         )
         let sut = makeSUT(store: store, passwordValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RecipesApp.InvalidPasswordError)
+            XCTAssertTrue(error is AppCoordinator.InvalidPasswordError)
         }
     }
     
@@ -79,8 +79,8 @@ class RegisterUseCaseTests: XCTestCase {
         passwordValidator: @escaping PasswordValidator = { _ in true },
         tokenProvider: @escaping AuthTokenProvider = { _,_ in "any" },
         hasher: @escaping PasswordHasher = { $0 }
-    ) -> RecipesApp {
-        return RecipesApp(
+    ) -> AppCoordinator {
+        return AppCoordinator(
             userStore: store,
             recipeStore: RecipeStoreDummy(),
             emailValidator: emailValidator,

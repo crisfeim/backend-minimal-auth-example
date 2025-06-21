@@ -43,8 +43,8 @@ class CreateRecipesUseCaseTests: XCTestCase {
     func makeSUT(
         store: RecipeStore,
         tokenVerifier: @escaping AuthTokenVerifier = { _ in UUID() },
-    ) -> RecipesApp {
-        return RecipesApp(
+    ) -> AppCoordinator {
+        return AppCoordinator(
             userStore: DummyUserStore(),
             recipeStore: store,
             emailValidator: { _ in true },

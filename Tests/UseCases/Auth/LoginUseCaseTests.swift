@@ -21,7 +21,7 @@ class LoginUseCaseTests: XCTestCase {
         let store = UserStoreStub(findUserResult: .success(nil), saveResult: .success(()))
         let sut = makeSUT(store: store)
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RecipesApp.NotFoundUserError)
+            XCTAssertTrue(error is AppCoordinator.NotFoundUserError)
         }
     }
     
@@ -29,7 +29,7 @@ class LoginUseCaseTests: XCTestCase {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
         let sut = makeSUT(store: store, emailValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RecipesApp.InvalidEmailError)
+            XCTAssertTrue(error is AppCoordinator.InvalidEmailError)
         }
     }
     
@@ -37,7 +37,7 @@ class LoginUseCaseTests: XCTestCase {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
         let sut = makeSUT(store: store, passwordValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RecipesApp.InvalidPasswordError)
+            XCTAssertTrue(error is AppCoordinator.InvalidPasswordError)
         }
     }
     
@@ -51,7 +51,7 @@ class LoginUseCaseTests: XCTestCase {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
         let sut = makeSUT(store: store, passwordVerifier: { _, _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RecipesApp.IncorrectPasswordError)
+            XCTAssertTrue(error is AppCoordinator.IncorrectPasswordError)
         }
     }
     
@@ -68,8 +68,8 @@ class LoginUseCaseTests: XCTestCase {
         passwordValidator: @escaping PasswordValidator = { _ in true },
         tokenProvider: @escaping AuthTokenProvider = { _,_ in "any-token" },
         passwordVerifier: @escaping PasswordVerifier = { _,_ in true }
-    ) -> RecipesApp {
-        return RecipesApp(
+    ) -> AppCoordinator {
+        return AppCoordinator(
             userStore: store,
             recipeStore: RecipeStoreDummy(),
             emailValidator: emailValidator,

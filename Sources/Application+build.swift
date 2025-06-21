@@ -18,7 +18,7 @@ public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, 
     let passwordHasher = BCryptPasswordHasher()
     let passwordVerifier = BCryptPasswordVerifier()
     
-    let coordinator = RecipesApp(
+    let coordinator = AppCoordinator(
         userStore: CodableUserStore(storeURL: userStoreURL),
         recipeStore: CodableRecipeStore(storeURL: recipeStoreURL),
         emailValidator: { _ in true },

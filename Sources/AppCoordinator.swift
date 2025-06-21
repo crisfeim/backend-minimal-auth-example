@@ -9,9 +9,7 @@ public typealias AuthTokenVerifier = (_ token: String) async throws -> UUID
 public typealias PasswordHasher = (_ input: String) async throws -> String
 public typealias PasswordVerifier = (_ password: String, _ hash: String) async throws -> Bool
 
-
-
-public class RecipesApp: @unchecked Sendable {
+public class AppCoordinator: @unchecked Sendable {
     private let userStore: UserStore
     private let recipeStore: RecipeStore
     private let emailValidator: EmailValidator

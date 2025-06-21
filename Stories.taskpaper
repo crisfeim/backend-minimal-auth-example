@@ -1,0 +1,19 @@
+Register sad path:
+    - System delivers error on user store saving error
+Register happy path:
+    - System delivers valid token
+Login sad path:
+    - System delivers error on user store error
+    - System delivers error on invalid password
+Login happy path:
+    - System delivers valid token
+Get recipes sad path:
+    - System delivers error on invalid access token
+    - System delivers error on recipes store error
+Get recipes happy path:
+    - System delivers user recipes
+Post recipes sad path:
+    - System delivers error on invalid access token
+    - System delivers error on malformed payload
+    - System delivers error on store error
+

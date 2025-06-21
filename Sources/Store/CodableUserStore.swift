@@ -13,7 +13,7 @@ public class CodableUserStore: UserStore {
     }
     
     public func createUser(id: UUID, email: String, hashedPassword: String) throws {
-        let user = CodableStoredUser(id: id, email: email, hashedPassword: hashedPassword)
+        let user = CodableUser(id: id, email: email, hashedPassword: hashedPassword)
         var users = try get()
         users.append(user)
         let data = try JSONEncoder().encode(users)
@@ -24,26 +24,26 @@ public class CodableUserStore: UserStore {
         return try get().first { $0.email == email }.map(UserMapper.map)
     }
     
-    private func get() throws -> [CodableStoredUser] {
+    private func get() throws -> [CodableUser] {
         guard FileManager.default.fileExists(atPath: storeURL.path) else { return [] }
         let data = try Data(contentsOf: storeURL)
-        return try JSONDecoder().decode([CodableStoredUser].self, from: data)
+        return try JSONDecoder().decode([CodableUser].self, from: data)
     }
 }
 
 
-private struct CodableStoredUser: Codable {
+private struct CodableUser: Codable {
     let id: UUID
     let email: String
     let hashedPassword: String
 }
 
 private enum UserMapper {
-    static func map(_ user: CodableStoredUser) -> User {
+    static func map(_ user: CodableUser) -> User {
         User(id: user.id, email: user.email, hashedPassword: user.hashedPassword)
     }
     
-    static func map(_ user: User) -> CodableStoredUser {
-        CodableStoredUser(id: user.id, email: user.email, hashedPassword: user.hashedPassword)
+    static func map(_ user: User) -> CodableUser {
+        CodableUser(id: user.id, email: user.email, hashedPassword: user.hashedPassword)
     }
 }

@@ -48,6 +48,10 @@ class RecipesApp {
             throw InvalidEmailError()
         }
         
+        guard passwordValidator(email) else {
+            throw InvalidPasswordError()
+        }
+        
         guard let _ = try store.findUser(byEmail: email) else {
             throw NotFoundUserError()
         }

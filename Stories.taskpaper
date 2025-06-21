@@ -7,8 +7,8 @@ Register happy path:
     - System delivers valid token @done
 Login sad path:
     - System delivers error on user store error @done
-    - System delivers error on invalid email
-    - System delivers error on invalid password
+    - System delivers error on invalid email @done
+    - System delivers error on invalid password @done
     - System delivers error on non existent user @done
 Login happy path:
     - System delivers valid token

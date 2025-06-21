@@ -49,6 +49,14 @@ class GetRecipesUseCaseTests: XCTestCase {
         )
     }
     
+    func anyRecipe() -> Recipe {
+        Recipe(id: UUID(), userId: UUID(), title: "any-title")
+    }
+    
+    func anyError() -> NSError {
+        NSError(domain: "any error", code: 0)
+    }
+    
     struct RecipeStoreStub: RecipeStore {
         let result: Result<[Recipe], Error>
         
@@ -59,22 +67,5 @@ class GetRecipesUseCaseTests: XCTestCase {
         func createRecipe(userId: UUID, title: String) throws -> Recipe {
             fatalError("should not be called in current test context")
         }
-    }
-    
-    struct DummyUserStore: UserStore {
-        func findUser(byEmail email: String) throws -> User? {
-            return nil
-        }
-        func createUser(id: UUID, email: String, hashedPassword: String) throws {
-            
-        }
-    }
-    
-    func anyRecipe() -> Recipe {
-        Recipe(id: UUID(), userId: UUID(), title: "any-title")
-    }
-    
-    func anyError() -> NSError {
-        NSError(domain: "any error", code: 0)
     }
 }

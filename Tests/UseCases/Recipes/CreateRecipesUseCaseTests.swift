@@ -56,6 +56,14 @@ class CreateRecipesUseCaseTests: XCTestCase {
         )
     }
     
+    func anyError() -> NSError {
+        NSError(domain: "any error", code: 0)
+    }
+    
+    func anyRecipe() -> Recipe {
+        Recipe(id: UUID(), userId: UUID(), title: "any-title")
+    }
+    
     struct RecipeStoreStub: RecipeStore {
         let result: Result<Recipe, Error>
         
@@ -66,45 +74,5 @@ class CreateRecipesUseCaseTests: XCTestCase {
         func createRecipe(userId: UUID, title: String) throws -> Recipe {
             try result.get()
         }
-    }
-    
-    class RecipeStoreSpy: RecipeStore {
-        let result: Result<Recipe, Error>
-        struct CreateRecipeCommand: Equatable {
-            let userId: UUID
-            let title: String
-        }
-        
-        var capturedMessages = [CreateRecipeCommand]()
-        
-        init(result: Result<Recipe, Error>) {
-            self.result = result
-        }
-        
-        func getRecipes() throws -> [Recipe] {
-            fatalError("should never be called within test case context")
-        }
-        
-        func createRecipe(userId: UUID, title: String) throws -> Recipe {
-            capturedMessages.append(.init(userId: userId, title: title))
-            return try result.get()
-        }
-    }
-    
-    struct DummyUserStore: UserStore {
-        func findUser(byEmail email: String) throws -> User? {
-            return nil
-        }
-        func createUser(id: UUID, email: String, hashedPassword: String) throws {
-            
-        }
-    }
-    
-    func anyError() -> NSError {
-        NSError(domain: "any error", code: 0)
-    }
-    
-    func anyRecipe() -> Recipe {
-        Recipe(id: UUID(), userId: UUID(), title: "any-title")
     }
 }

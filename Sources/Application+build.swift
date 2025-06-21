@@ -27,15 +27,15 @@ func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeS
     )
     
     let tokenProvider = TokenProvider(kid: JWKIdentifier("auth-jwt"), jwtKeyCollection: jwtKeyCollection)
-    
-    let coordinator = RecipesApp(
+    let passwordHasher = BCryptPasswordHasher()
+    let _ = RecipesApp(
         userStore: CodableUserStore(storeURL: userStoreURL),
         recipeStore: CodableRecipeStore(storeURL: recipeStoreURL),
         emailValidator: { _ in true },
         passwordValidator: { _ in true },
         tokenProvider:  tokenProvider.makeToken,
         tokenVerifier: { _ in UUID() },
-        passwordHasher: { _ in "@todo" },
+        passwordHasher: passwordHasher.hash,
         passwordVerifier: { _,_ in true }
     )
     
@@ -76,5 +76,14 @@ struct TokenProvider {
             email: email
         )
         return try await self.jwtKeyCollection.sign(payload, kid: self.kid)
+    }
+}
+
+import HummingbirdBcrypt
+import NIOPosix
+
+struct BCryptPasswordHasher {
+    func hash(password: String) async throws -> String {
+       return try await NIOThreadPool.singleton.runIfActive { Bcrypt.hash(password, cost: 12) }
     }
 }

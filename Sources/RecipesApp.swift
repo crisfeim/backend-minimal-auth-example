@@ -4,7 +4,7 @@ import Foundation
 
 public typealias EmailValidator  = (_ email: String) -> Bool
 public typealias PasswordValidator = (_ password: String) -> Bool
-public typealias AuthTokenProvider = (_ email: String) -> String
+public typealias AuthTokenProvider = (_ userId: UUID, _ email: String) async throws -> String
 public typealias AuthTokenVerifier = (_ token: String) async throws -> UUID
 public typealias PasswordHasher = (_ input: String) async throws -> String
 public typealias PasswordVerifier = (_ password: String, _ hash: String) async throws -> Bool
@@ -52,8 +52,9 @@ public class RecipesApp {
         }
         
         let hashedPassword = try await passwordHasher(password)
-        try userStore.createUser(id: UUID(), email: email, hashedPassword: hashedPassword)
-        return ["token": tokenProvider(email)]
+        let userID = UUID()
+        try userStore.createUser(id: userID, email: email, hashedPassword: hashedPassword)
+        return ["token": try await tokenProvider(userID, email)]
     }
     
     public func login(email: String, password: String) async throws -> [String: String] {
@@ -73,7 +74,7 @@ public class RecipesApp {
             throw IncorrectPasswordError()
         }
         
-        return ["token": tokenProvider(email)]
+        return ["token": try await tokenProvider(user.id, email)]
     }
     
     public func getRecipes(accessToken: String) async throws -> [Recipe] {

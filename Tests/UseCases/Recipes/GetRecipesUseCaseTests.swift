@@ -42,7 +42,7 @@ class GetRecipesUseCaseTests: XCTestCase {
             recipeStore: store,
             emailValidator: { _ in true },
             passwordValidator: { _ in true },
-            tokenProvider: { $0 },
+            tokenProvider: { _,_ in "any" },
             tokenVerifier: tokenVerifier,
             passwordHasher: { $0 },
             passwordVerifier: { _,_ in true }

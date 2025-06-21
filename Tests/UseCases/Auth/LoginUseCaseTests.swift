@@ -57,7 +57,7 @@ class LoginUseCaseTests: XCTestCase {
     
     func test_login_deliversProvidedTokenOnCorrectCredentialsAndFoundUser() async throws {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
-        let sut = makeSUT(store: store, tokenProvider: { _ in "any-provided-token" })
+        let sut = makeSUT(store: store, tokenProvider: { _,_ in "any-provided-token" })
         let token = try await sut.login(email: "any-email", password: "any-password")
         XCTAssertEqual(token["token"], "any-provided-token")
     }
@@ -66,7 +66,7 @@ class LoginUseCaseTests: XCTestCase {
         store: UserStore,
         emailValidator: @escaping EmailValidator = { _ in true },
         passwordValidator: @escaping PasswordValidator = { _ in true },
-        tokenProvider: @escaping AuthTokenProvider = { _ in "any-token" },
+        tokenProvider: @escaping AuthTokenProvider = { _,_ in "any-token" },
         passwordVerifier: @escaping PasswordVerifier = { _,_ in true }
     ) -> RecipesApp {
         return RecipesApp(

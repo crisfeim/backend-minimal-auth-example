@@ -59,7 +59,7 @@ class RegisterUseCaseTests: XCTestCase {
             saveResult: .success(())
         )
         
-        let sut = makeSUT(store: store, tokenProvider: { _ in "any-provided-token" })
+        let sut = makeSUT(store: store, tokenProvider: { _,_ in "any-provided-token" })
         let token = try await sut.register(email: "any-email", password: "any-password")
         XCTAssertEqual(token["token"], "any-provided-token")
     }
@@ -77,7 +77,7 @@ class RegisterUseCaseTests: XCTestCase {
         store: UserStore,
         emailValidator: @escaping EmailValidator = { _ in true },
         passwordValidator: @escaping PasswordValidator = { _ in true },
-        tokenProvider: @escaping AuthTokenProvider = { $0 },
+        tokenProvider: @escaping AuthTokenProvider = { _,_ in "any" },
         hasher: @escaping PasswordHasher = { $0 }
     ) -> RecipesApp {
         return RecipesApp(

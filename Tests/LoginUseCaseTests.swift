@@ -17,6 +17,14 @@ class LoginUseCaseTests: XCTestCase {
         XCTAssertThrowsError(try sut.login(email: "any-email", password: "any-password"))
     }
     
+    func test_login_deliversErrorOnNotFoundUser() throws {
+        let store = UserStoreStub(findUserResult: .success(nil), saveResult: .success(()))
+        let sut = makeSUT(store: store)
+        XCTAssertThrowsError(try sut.login(email: "any-email", password: "any-password")) { error in
+            XCTAssertTrue(error is RecipesApp.NotFoundUserError)
+        }
+    }
+    
     func makeSUT(
         store: UserStore,
         emailValidator: @escaping EmailValidator = { _ in true },

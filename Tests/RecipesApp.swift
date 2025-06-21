@@ -23,6 +23,7 @@ class RecipesApp {
     struct UserAlreadyExists: Error {}
     struct InvalidEmailError: Error {}
     struct InvalidPasswordError: Error {}
+    struct NotFoundUserError: Error {}
     
     func register(email: String, password: String) throws -> [String: String] {
         guard try store.findUser(byEmail: email) == nil else {
@@ -43,6 +44,8 @@ class RecipesApp {
     }
     
     func login(email: String, password: String) throws {
-        let _ = try store.findUser(byEmail: email)
+        guard let user = try store.findUser(byEmail: email) else {
+            throw NotFoundUserError()
+        }
     }
 }

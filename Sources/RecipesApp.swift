@@ -1,31 +1,30 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 21/6/25.
 
 import Foundation
-import MinimalAuthExample
 
-typealias EmailValidator  = (_ email: String) -> Bool
-typealias PasswordValidator = (_ password: String) -> Bool
-typealias AuthTokenProvider = (_ email: String) -> String
+public typealias EmailValidator  = (_ email: String) -> Bool
+public typealias PasswordValidator = (_ password: String) -> Bool
+public typealias AuthTokenProvider = (_ email: String) -> String
 
-class RecipesApp {
-    let store: UserStore
-    let emailValidator: EmailValidator
-    let passwordValidator: PasswordValidator
-    let tokenProvider: AuthTokenProvider
+public class RecipesApp {
+    private let store: UserStore
+    private let emailValidator: EmailValidator
+    private let passwordValidator: PasswordValidator
+    private let tokenProvider: AuthTokenProvider
     
-    init(store: UserStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider) {
+    public init(store: UserStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider) {
         self.store = store
         self.emailValidator = emailValidator
         self.passwordValidator = passwordValidator
         self.tokenProvider = tokenProvider
     }
     
-    struct UserAlreadyExists: Error {}
-    struct InvalidEmailError: Error {}
-    struct InvalidPasswordError: Error {}
-    struct NotFoundUserError: Error {}
+    public struct UserAlreadyExists: Error {}
+    public struct InvalidEmailError: Error {}
+    public struct InvalidPasswordError: Error {}
+    public struct NotFoundUserError: Error {}
     
-    func register(email: String, password: String) throws -> [String: String] {
+    public func register(email: String, password: String) throws -> [String: String] {
         guard try store.findUser(byEmail: email) == nil else {
             throw UserAlreadyExists()
         }
@@ -42,7 +41,7 @@ class RecipesApp {
         return ["token": tokenProvider(email)]
     }
     
-    func login(email: String, password: String) throws -> [String: String] {
+    public func login(email: String, password: String) throws -> [String: String] {
         guard emailValidator(email) else {
             throw InvalidEmailError()
         }

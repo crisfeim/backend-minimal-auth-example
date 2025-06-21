@@ -5,9 +5,18 @@ public func routes(_ app: Application, userStore: any UserStore) throws {
         do {
             let data = try req.content.decode(RegisterRequest.self)
             let user = User(id: UUID(), email: data.email, hashedPassword: data.password)
+            
+            let payload = UserJWTPayload(
+                sub: .init(value: user.id.uuidString),
+                exp: .init(value: .init(timeIntervalSinceNow: 3600)),
+                email: user.email
+            )
+            
             try userStore.saveUser(user)
-            return TokenResponse(token: "")
+            let token = try await req.jwt.sign(payload)
+            return TokenResponse(token: token)
         } catch {
+            print("Error on register", error)
             throw Abort(.internalServerError, reason: "Failed to save user")
         }
     }

@@ -2,6 +2,11 @@ import MinimalAuthExample
 import VaporTesting
 import Testing
 
+import JWT
+import Vapor
+
+
+
 
 @Suite("Register Use Case Tests")
 struct RegisterUseCaseTests {
@@ -58,6 +63,32 @@ struct RegisterUseCaseTests {
         }
     }
     
+    @Test("Register returns valid token with correct user data")
+    func postRegister_deliversCorrectTokenOnSuccessfulRegistration() async throws {
+        let store = UserStoreSpy()
+
+        try await withApp(configure: configure(userStore: store)) { app in
+            let body = RegisterRequest(email: "test@example.com", password: "123456")
+            let buffer = try body.encodeToByteBuffer(using: app.allocator)
+
+            try await app.testing().test(
+                .POST,
+                "register",
+                headers: ["Content-Type": "application/json"],
+                body: buffer
+            ) { res async throws in
+                
+                let token = try res.content.decode(TokenResponse.self).token
+                
+                let fakeReq = Request(application: app, on: app.eventLoopGroup.next())
+                let payload = try await fakeReq.jwt.verify(token, as: UserJWTPayload.self)
+                
+                #expect(payload.email == "test@example.com")
+                #expect(UUID(uuidString: payload.sub.value) != nil)
+            }
+        }
+    }
+    
 }
 
 // MARK: - Test doubles
@@ -91,7 +122,7 @@ typealias Configure = (Application) async throws -> Void
 
 func configure(userStore: any UserStore) -> Configure {
     return { app in
-        try routes(app, userStore: userStore)
+      try await configure(app, userStore: userStore)
     }
 }
 

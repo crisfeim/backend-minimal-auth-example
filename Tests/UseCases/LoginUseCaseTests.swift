@@ -11,40 +11,46 @@ class LoginUseCaseTests: XCTestCase {
         XCTAssertEqual(store.messages, [])
     }
     
-    func test_login_deliversErrorOnStoreError() throws {
+    func test_login_deliversErrorOnStoreError() async throws {
         let store = UserStoreStub(findUserResult: .failure(anyError()), saveResult: .success(()))
         let sut = makeSUT(store: store)
-        XCTAssertThrowsError(try sut.login(email: "any-email", password: "any-password"))
+        await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password"))
     }
     
-    func test_login_deliversErrorOnNotFoundUser() throws {
+    func test_login_deliversErrorOnNotFoundUser() async throws {
         let store = UserStoreStub(findUserResult: .success(nil), saveResult: .success(()))
         let sut = makeSUT(store: store)
-        XCTAssertThrowsError(try sut.login(email: "any-email", password: "any-password")) { error in
+        await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
             XCTAssertTrue(error is RecipesApp.NotFoundUserError)
         }
     }
     
-    func test_login_deliversErrorOnInvalidEmail() throws {
+    func test_login_deliversErrorOnInvalidEmail() async throws {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
         let sut = makeSUT(store: store, emailValidator: { _ in false })
-        XCTAssertThrowsError(try sut.login(email: "any-email", password: "any-password")) { error in
+        await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
             XCTAssertTrue(error is RecipesApp.InvalidEmailError)
         }
     }
     
-    func test_login_deliversErrorOnInvalidPassword() throws {
+    func test_login_deliversErrorOnInvalidPassword() async throws {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
         let sut = makeSUT(store: store, passwordValidator: { _ in false })
-        XCTAssertThrowsError(try sut.login(email: "any-email", password: "any-password")) { error in
+        await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
             XCTAssertTrue(error is RecipesApp.InvalidPasswordError)
         }
     }
     
-    func test_login_deliversProvidedTokenOnCorrectCredentialsAndFoundUser() throws {
+    func test_login_deliversErrorOnPasswordVerifierError() async throws {
+        let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
+        let sut = makeSUT(store: store, passwordVerifier: { _, _ in throw self.anyError() })
+        await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password"))
+    }
+    
+    func test_login_deliversProvidedTokenOnCorrectCredentialsAndFoundUser() async throws {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
         let sut = makeSUT(store: store, tokenProvider: { _ in "any-provided-token" })
-        let token = try sut.login(email: "any-email", password: "any-password")
+        let token = try await sut.login(email: "any-email", password: "any-password")
         XCTAssertEqual(token["token"], "any-provided-token")
     }
     
@@ -53,14 +59,16 @@ class LoginUseCaseTests: XCTestCase {
         emailValidator: @escaping EmailValidator = { _ in true },
         passwordValidator: @escaping PasswordValidator = { _ in true },
         tokenProvider: @escaping AuthTokenProvider = { _ in "any-token" },
-        hasher: @escaping Hasher = { $0 }
+        hasher: @escaping Hasher = { $0 },
+        passwordVerifier: @escaping PasswordVerifier = { _,_ in true }
     ) -> RecipesApp {
         return RecipesApp(
             userStore: store,
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider,
-            hasher: hasher
+            hasher: hasher,
+            passwordVerifier: passwordVerifier
         )
     }
     

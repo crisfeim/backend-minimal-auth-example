@@ -11,6 +11,7 @@ Login sad path:
     - System delivers error on invalid email @done
     - System delivers error on invalid password @done
     - System delivers error on non existent user @done
+    - System delivers error on password verifier error @done
     - System delivers error on incorect password
 Login happy path:
     - System delivers valid token @done

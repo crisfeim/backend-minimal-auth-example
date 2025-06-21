@@ -85,7 +85,8 @@ class RegisterUseCaseTests: XCTestCase {
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider,
-            hasher: hasher
+            hasher: hasher,
+            passwordVerifier: { _,_ in true }
         )
     }
     
@@ -132,17 +133,4 @@ private extension RegisterUseCaseTests {
     }
 }
 
-private func XCTAssertThrowsErrorAsync<T>(
-    _ expression: @autoclosure () async throws -> T,
-    _ message: @autoclosure () -> String = "",
-    file: StaticString = #filePath,
-    line: UInt = #line,
-    _ errorHandler: (_ error: Error) -> Void = { _ in }
-) async {
-    do {
-        _ = try await expression()
-        XCTFail("Expected error to be thrown, but no error was thrown. \(message())", file: file, line: line)
-    } catch {
-        errorHandler(error)
-    }
-}
+

@@ -1,10 +1,12 @@
 Register sad path:
     - System delivers error on user store saving error
+    - System delivers error on already existent user
 Register happy path:
     - System delivers valid token
 Login sad path:
     - System delivers error on user store error
     - System delivers error on invalid password
+    - System delivers error on non existent user
 Login happy path:
     - System delivers valid token
 Get recipes sad path:

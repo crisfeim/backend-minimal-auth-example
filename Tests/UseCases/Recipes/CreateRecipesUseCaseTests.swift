@@ -17,6 +17,17 @@ class CreateRecipesUseCaseTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.createRecipe(accessToken: "any valid access token", title: "Fried chicken"))
     }
     
+    
+    func test_postRecipe_deliversRecipeOnSuccess() async throws {
+        let stubbedRecipe = anyRecipe()
+        let store = RecipeStoreStub(result: .success(stubbedRecipe))
+        let sut = makeSUT(store: store)
+        
+        let recipe = try await sut.createRecipe(accessToken: "any valid access token", title: "Fried chicken")
+        
+        XCTAssertEqual(recipe, stubbedRecipe)
+    }
+    
     func makeSUT(
         store: RecipeStore,
         tokenVerifier: @escaping AuthTokenVerifier = { _ in UUID() },

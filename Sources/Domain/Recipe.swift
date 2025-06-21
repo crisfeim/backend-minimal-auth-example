@@ -3,8 +3,8 @@ import Foundation
 
 public struct Recipe: Equatable {
     let id: UUID
-    let userId: UUID
-    let title: String
+    public let userId: UUID
+    public let title: String
     
     public init(id: UUID, userId: UUID, title: String) {
         self.id = id

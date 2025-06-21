@@ -55,7 +55,7 @@ class LoginUseCaseTests: XCTestCase {
         tokenProvider: @escaping AuthTokenProvider = { _ in "any-token" }
     ) -> RecipesApp {
         return RecipesApp(
-            store: store,
+            userStore: store,
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider

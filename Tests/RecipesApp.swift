@@ -44,7 +44,11 @@ class RecipesApp {
     }
     
     func login(email: String, password: String) throws {
-        guard let user = try store.findUser(byEmail: email) else {
+        guard emailValidator(email) else {
+            throw InvalidEmailError()
+        }
+        
+        guard let _ = try store.findUser(byEmail: email) else {
             throw NotFoundUserError()
         }
     }

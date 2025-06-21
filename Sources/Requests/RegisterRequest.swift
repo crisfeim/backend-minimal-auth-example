@@ -1,8 +1,6 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 21/6/25.
 
-import Vapor
-
-public struct RegisterRequest: Content {
+public struct RegisterRequest {
     let email: String
     let password: String
     

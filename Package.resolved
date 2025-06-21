@@ -1,5 +1,5 @@
 {
-  "originHash" : "ea2ceb93b605f67acdd576da7ee7c60b4f43efb77289d2fc47a6dd96f73b0a76",
+  "originHash" : "3fb2e2abdd8bfc5400975d0978d2217d2844570a5ced42d2f4b1dead01602c48",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -11,57 +11,12 @@
       }
     },
     {
-      "identity" : "async-kit",
+      "identity" : "hummingbird",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vapor/async-kit.git",
+      "location" : "https://github.com/hummingbird-project/hummingbird.git",
       "state" : {
-        "revision" : "e048c8ee94967e8d8a1c2ec0e1156d6f7fa34d31",
-        "version" : "1.20.0"
-      }
-    },
-    {
-      "identity" : "console-kit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vapor/console-kit.git",
-      "state" : {
-        "revision" : "742f624a998cba2a9e653d9b1e91ad3f3a5dff6b",
-        "version" : "4.15.2"
-      }
-    },
-    {
-      "identity" : "jwt",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vapor/jwt.git",
-      "state" : {
-        "revision" : "af1c59762d70d1065ddbc0d7902ea9b3dacd1a26",
-        "version" : "5.1.2"
-      }
-    },
-    {
-      "identity" : "jwt-kit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vapor/jwt-kit.git",
-      "state" : {
-        "revision" : "03f5013f0b547ce43abe45e7e90711303a3e5495",
-        "version" : "5.1.2"
-      }
-    },
-    {
-      "identity" : "multipart-kit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vapor/multipart-kit.git",
-      "state" : {
-        "revision" : "3498e60218e6003894ff95192d756e238c01f44e",
-        "version" : "4.7.1"
-      }
-    },
-    {
-      "identity" : "routing-kit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vapor/routing-kit.git",
-      "state" : {
-        "revision" : "93f7222c8e195cbad39fafb5a0e4cc85a8def7ea",
-        "version" : "4.9.2"
+        "revision" : "65ace7855fa8413d6218adeecaf706f2b99c23c1",
+        "version" : "2.14.1"
       }
     },
     {
@@ -71,6 +26,15 @@
       "state" : {
         "revision" : "87e50f483c54e6efd60e885f7f5aa946cee68023",
         "version" : "1.2.1"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "011f0c765fb46d9cac61bca19be0527e99c98c8b",
+        "version" : "1.5.1"
       }
     },
     {
@@ -251,24 +215,6 @@
       "state" : {
         "revision" : "61e4ca4b81b9e09e2ec863b00c340eb13497dac6",
         "version" : "1.5.0"
-      }
-    },
-    {
-      "identity" : "vapor",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vapor/vapor.git",
-      "state" : {
-        "revision" : "4014016aad591a120f244f9b9e8a57252b7e62b4",
-        "version" : "4.115.0"
-      }
-    },
-    {
-      "identity" : "websocket-kit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vapor/websocket-kit.git",
-      "state" : {
-        "revision" : "8666c92dbbb3c8eefc8008c9c8dcf50bfd302167",
-        "version" : "2.16.1"
       }
     }
   ],

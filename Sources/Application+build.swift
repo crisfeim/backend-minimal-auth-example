@@ -3,19 +3,6 @@
 import Foundation
 import Hummingbird
 
-func makeApp(configuration: ApplicationConfiguration) -> some ApplicationProtocol {
-    let router = Router()
-    router.get("/") { _, _ in
-        return "Hello"
-    }
-
-    let app = Application(
-        router: router,
-        configuration: configuration
-    )
-    return app
-}
-
 public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeStoreURL: URL) async -> some ApplicationProtocol {
     
     let jwtKeyCollection = JWTKeyCollection()

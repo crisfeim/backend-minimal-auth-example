@@ -53,7 +53,7 @@ class RegisterUseCaseTests: XCTestCase {
     
     func test_init_doesntMessagesStoreUponCreation() throws {
         let store = UserStoreSpy()
-        let _ = RecipesApp(store: store)
+        let _ = makeSUT(store: store)
         XCTAssertEqual(store.messages, [])
     }
     
@@ -62,7 +62,7 @@ class RegisterUseCaseTests: XCTestCase {
             findUserResult: .success(anyUser()),
             saveResult: .failure(anyError())
         )
-        let sut = RecipesApp(store: store)
+        let sut = makeSUT(store: store)
         XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password"))
     }
     
@@ -71,8 +71,12 @@ class RegisterUseCaseTests: XCTestCase {
             findUserResult: .success(anyUser()),
             saveResult: .success(())
         )
-        let sut = RecipesApp(store: store)
+        let sut = makeSUT(store: store)
         XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password"))
+    }
+
+    func makeSUT(store: UserStore) -> RecipesApp {
+        return RecipesApp(store: store)
     }
     
     func anyError() -> NSError {

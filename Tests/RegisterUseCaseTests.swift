@@ -23,11 +23,26 @@ class RegisterUseCaseTests: XCTestCase {
         }
     }
     
+    struct UserStoreStub: UserStore {
+        let saveResult: Result<Void, Error>
+        func findUser(byEmail email: String) throws -> User? {
+            return nil
+        }
+        
+        func saveUser(_ user: User) throws {
+            try saveResult.get()
+        }
+    }
+    
     class RecipesApp {
         let store: UserStore
         
         init(store: UserStore) {
             self.store = store
+        }
+        
+        func register(email: String, password: String) throws {
+            try store.saveUser(User(id: UUID(), email: email, hashedPassword: password))
         }
     }
     
@@ -35,5 +50,15 @@ class RegisterUseCaseTests: XCTestCase {
         let store = UserStoreSpy()
         let _ = RecipesApp(store: store)
         XCTAssertEqual(store.messages, [])
+    }
+    
+    func test_register_deliversErrorOnStoreError() throws {
+        let store = UserStoreStub(saveResult: .failure(anyError()))
+        let sut = RecipesApp(store: store)
+        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password"))
+    }
+    
+    func anyError() -> NSError {
+        NSError(domain: "any error", code: 0)
     }
 }

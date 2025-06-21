@@ -1,4 +1,4 @@
-@testable import MinimalAuthExample
+import MinimalAuthExample
 import VaporTesting
 import Testing
 

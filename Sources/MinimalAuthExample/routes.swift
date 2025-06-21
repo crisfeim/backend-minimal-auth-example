@@ -1,6 +1,6 @@
 import Vapor
 
-func routes(_ app: Application, userStore: any UserStore) throws {
+public func routes(_ app: Application, userStore: any UserStore) throws {
     app.post("register") { req async throws -> HTTPStatus in
         do {
             let data = try req.content.decode(RegisterRequest.self)

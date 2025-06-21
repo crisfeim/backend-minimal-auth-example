@@ -1,6 +1,6 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 21/6/25.
 
-@testable import MinimalAuthExample
+import MinimalAuthExample
 import VaporTesting
 import Testing
 

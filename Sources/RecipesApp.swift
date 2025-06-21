@@ -6,7 +6,7 @@ public typealias EmailValidator  = (_ email: String) -> Bool
 public typealias PasswordValidator = (_ password: String) -> Bool
 public typealias AuthTokenProvider = (_ email: String) -> String
 public typealias AuthTokenVerifier = (_ token: String) async throws -> UUID
-public typealias Hasher = (_ input: String) async throws -> String
+public typealias PasswordHasher = (_ input: String) async throws -> String
 public typealias PasswordVerifier = (_ password: String, _ hash: String) async throws -> Bool
 
 
@@ -18,17 +18,17 @@ public class RecipesApp {
     private let passwordValidator: PasswordValidator
     private let tokenProvider: AuthTokenProvider
     private let tokenVerifier: AuthTokenVerifier
-    private let hasher: Hasher
+    private let passwordHasher: PasswordHasher
     private let passwordVerifier: PasswordVerifier
     
-    public init(userStore: UserStore, recipeStore: RecipeStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider, tokenVerifier: @escaping AuthTokenVerifier, hasher: @escaping Hasher, passwordVerifier: @escaping PasswordVerifier) {
+    public init(userStore: UserStore, recipeStore: RecipeStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider, tokenVerifier: @escaping AuthTokenVerifier, passwordHasher: @escaping PasswordHasher, passwordVerifier: @escaping PasswordVerifier) {
         self.userStore = userStore
         self.recipeStore = recipeStore
         self.emailValidator = emailValidator
         self.passwordValidator = passwordValidator
         self.tokenProvider = tokenProvider
         self.tokenVerifier = tokenVerifier
-        self.hasher = hasher
+        self.passwordHasher = passwordHasher
         self.passwordVerifier = passwordVerifier
     }
     
@@ -51,7 +51,7 @@ public class RecipesApp {
             throw InvalidPasswordError()
         }
         
-        let hashedPassword = try await hasher(password)
+        let hashedPassword = try await passwordHasher(password)
         try userStore.createUser(id: UUID(), email: email, hashedPassword: hashedPassword)
         return ["token": tokenProvider(email)]
     }

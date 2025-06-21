@@ -76,7 +76,7 @@ class LoginUseCaseTests: XCTestCase {
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider,
             tokenVerifier: { _ in UUID() },
-            hasher: { $0 },
+            passwordHasher: { $0 },
             passwordVerifier: passwordVerifier
         )
     }

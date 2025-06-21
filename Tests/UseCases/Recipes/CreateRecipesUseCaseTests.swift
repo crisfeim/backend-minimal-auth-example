@@ -51,7 +51,7 @@ class CreateRecipesUseCaseTests: XCTestCase {
             passwordValidator: { _ in true },
             tokenProvider: { $0 },
             tokenVerifier: tokenVerifier,
-            hasher: { $0 },
+            passwordHasher: { $0 },
             passwordVerifier: { _,_ in true }
         )
     }

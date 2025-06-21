@@ -11,6 +11,7 @@ public typealias PasswordVerifier = (_ password: String, _ hash: String) async t
 
 public protocol RecipeStore {
     func getRecipes() throws -> [Recipe]
+    func createRecipe(userId: UUID, title: String) throws -> Recipe
 }
 
 public class RecipesApp {
@@ -83,5 +84,9 @@ public class RecipesApp {
         let recipes = try recipeStore.getRecipes()
 
         return recipes.filter { $0.userId == userId }
+    }
+    
+    public func createRecipe(title: String) async throws -> Recipe {
+        try recipeStore.createRecipe(userId: UUID(), title: title)
     }
 }

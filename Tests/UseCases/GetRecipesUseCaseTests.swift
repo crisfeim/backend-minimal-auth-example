@@ -26,7 +26,7 @@ class GetRecipesUseCaseTests: XCTestCase {
     func test_getRecipes_deliversUserRecipesOnCorrectAccessToken() async throws {
         let user = User(id: UUID(), email: "any@email.com", hashedPassword: "1234")
         let otherUserRecipes = [anyRecipe(), anyRecipe(), anyRecipe()]
-        let userRecipes = [Recipe(id: UUID(), userId: user.id)]
+        let userRecipes = [Recipe(id: UUID(), userId: user.id, title: "any-title")]
         let store = RecipeStoreStub(result: .success(otherUserRecipes + userRecipes))
         let sut = makeSUT(store: store, tokenVerifier: { _ in user.id })
         let recipes = try await sut.getRecipes(accessToken: "anyvalidtoken")
@@ -55,6 +55,10 @@ class GetRecipesUseCaseTests: XCTestCase {
         func getRecipes() throws -> [Recipe] {
             try result.get()
         }
+        
+        func createRecipe(userId: UUID, title: String) throws -> Recipe {
+            fatalError("should not be called in current test context")
+        }
     }
     
     struct DummyUserStore: UserStore {
@@ -65,7 +69,7 @@ class GetRecipesUseCaseTests: XCTestCase {
     }
     
     func anyRecipe() -> Recipe {
-        Recipe(id: UUID(), userId: UUID())
+        Recipe(id: UUID(), userId: UUID(), title: "any-title")
     }
     
     func anyError() -> NSError {

@@ -41,4 +41,8 @@ class RecipesApp {
             let token = tokenProvider(email)
             return ["token": token]
         }
+    
+        func login(email: String, password: String) throws {
+            let _ = try store.findUser(byEmail: email)
+        }
     }

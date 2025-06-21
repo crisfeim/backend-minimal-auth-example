@@ -28,6 +28,8 @@ func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeS
     
     let tokenProvider = TokenProvider(kid: JWKIdentifier("auth-jwt"), jwtKeyCollection: jwtKeyCollection)
     let passwordHasher = BCryptPasswordHasher()
+    let passwordVerifier = BCryptPasswordVerifier()
+    
     let _ = RecipesApp(
         userStore: CodableUserStore(storeURL: userStoreURL),
         recipeStore: CodableRecipeStore(storeURL: recipeStoreURL),
@@ -35,8 +37,8 @@ func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeS
         passwordValidator: { _ in true },
         tokenProvider:  tokenProvider.makeToken,
         tokenVerifier: { _ in UUID() },
-        passwordHasher: passwordHasher.hash,
-        passwordVerifier: { _,_ in true }
+        passwordHasher: passwordHasher.execute,
+        passwordVerifier: passwordVerifier.execute
     )
     
     let router = Router()
@@ -83,7 +85,18 @@ import HummingbirdBcrypt
 import NIOPosix
 
 struct BCryptPasswordHasher {
-    func hash(password: String) async throws -> String {
+    func execute(_ password: String) async throws -> String {
        return try await NIOThreadPool.singleton.runIfActive { Bcrypt.hash(password, cost: 12) }
     }
 }
+
+
+struct BCryptPasswordVerifier {
+    func execute(_ password: String, _ hash: String) async throws -> Bool {
+        try await NIOThreadPool.singleton.runIfActive {
+            Bcrypt.verify(password, hash: hash)
+        }
+    }
+}
+
+

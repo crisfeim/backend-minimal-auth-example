@@ -2,7 +2,7 @@
 
 import Foundation
 
-public class CodableRecipeStore {
+public class CodableRecipeStore: RecipeStore {
     private let store: CodableStore<CodableRecipe>
     
     public init(storeURL: URL) {

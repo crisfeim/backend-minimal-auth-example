@@ -4,7 +4,7 @@ import ArgumentParser
 import Foundation
 
 @main
-struct HummingbirdArguments: AsyncParsableCommand {
+struct CLI: AsyncParsableCommand {
     @Option(name: .shortAndLong)
     var hostname: String = "127.0.0.1"
 

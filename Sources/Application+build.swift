@@ -2,6 +2,7 @@
 
 import Foundation
 import Hummingbird
+import JWTKit
 
 public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeStoreURL: URL) async -> some ApplicationProtocol {
     
@@ -100,86 +101,3 @@ public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, 
     return app
 }
 
-import JWTKit
-
-struct JWTPayloadData: JWTPayload, Equatable {
-    var subject: SubjectClaim
-    var expiration: ExpirationClaim
-    // Define additional JWT Attributes here
-    var email: String
-
-    func verify(using algorithm: some JWTAlgorithm) async throws {
-        try self.expiration.verifyNotExpired()
-    }
-}
-
-
-struct TokenProvider {
-    let kid: JWKIdentifier
-    let jwtKeyCollection: JWTKeyCollection
-    
-    func execute(userId: UUID, email: String) async throws -> String {
-        let payload = JWTPayloadData(
-            subject: .init(value: userId.uuidString),
-            expiration: .init(value: Date(timeIntervalSinceNow: 12 * 60 * 60)),
-            email: email
-        )
-        return try await self.jwtKeyCollection.sign(payload, kid: self.kid)
-    }
-}
-
-import HummingbirdBcrypt
-import NIOPosix
-
-struct BCryptPasswordHasher {
-    func execute(_ password: String) async throws -> String {
-       return try await NIOThreadPool.singleton.runIfActive { Bcrypt.hash(password, cost: 12) }
-    }
-}
-
-
-struct BCryptPasswordVerifier {
-    func execute(_ password: String, _ hash: String) async throws -> Bool {
-        try await NIOThreadPool.singleton.runIfActive {
-            Bcrypt.verify(password, hash: hash)
-        }
-    }
-}
-
-struct TokenVerifier {
-    let jwtKeyCollection: JWTKeyCollection
-
-    func execute(_ token: String) async throws -> UUID {
-        let payload = try await jwtKeyCollection.verify(token, as: JWTPayloadData.self)
-        
-        guard let uuid = UUID(uuidString: payload.subject.value) else {
-            throw InvalidSubjectError()
-        }
-        return uuid
-    }
-
-    struct InvalidSubjectError: Error {}
-}
-
-
-import Foundation
-import Hummingbird
-
-enum ResponseGeneratorEncoder {
-    static func execute<T: Encodable>(_ encodable: T, from request: Request, context: some RequestContext) throws -> Response {
-        let data = try JSONEncoder().encode(encodable)
-        var buffer = ByteBufferAllocator().buffer(capacity: data.count)
-        buffer.writeBytes(data)
-        
-        var headers = HTTPFields()
-        headers.reserveCapacity(4)
-        headers.append(.init(name: .contentType, value: "application/json"))
-        headers.append(.init(name: .contentLength, value: buffer.readableBytes.description))
-
-        return Response(
-            status: .ok,
-            headers: headers,
-            body: .init(byteBuffer: buffer)
-        )
-    }
-}

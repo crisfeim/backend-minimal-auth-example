@@ -11,7 +11,7 @@ struct HummingbirdArguments: AsyncParsableCommand {
     var port: Int = 8080
 
     func run() async throws {
-        let app = buildApplication(
+        let app = makeApp(
             configuration: .init(
                 address: .hostname(self.hostname, port: self.port),
                 serverName: "Hummingbird"

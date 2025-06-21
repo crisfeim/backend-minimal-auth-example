@@ -64,6 +64,18 @@ final class AppTests: XCTestCase {
                 ) { response in
                     let recipe = try JSONDecoder().decode(Recipe.self, from: response.body)
                     XCTAssertEqual(recipe.title, "Test recipe")
+                    
+                    try await client.execute(
+                        uri: "/recipes",
+                        method: .get,
+                        headers: [
+                            .init("Content-Type")!: "application/json",
+                            .init("Authorization")!: "Bearer \(tokenResponse.token)"
+                        ]
+                    ) { response in
+                        let recipes = try JSONDecoder().decode([Recipe].self, from: response.body)
+                        XCTAssertEqual(recipes, [recipe])
+                    }
                 }
             }
         }

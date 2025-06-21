@@ -82,6 +82,7 @@ class RegisterUseCaseTests: XCTestCase {
     ) -> RecipesApp {
         return RecipesApp(
             userStore: store,
+            recipeStore: RecipeStoreDummy(),
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider,
@@ -102,6 +103,12 @@ class RegisterUseCaseTests: XCTestCase {
 
 // MARK: - Double
 private extension RegisterUseCaseTests {
+    struct RecipeStoreDummy: RecipeStore {
+        func getRecipes() throws -> [Recipe] {
+            [ ]
+        }
+    }
+    
     class UserStoreSpy: UserStore {
         private(set) var messages = [Message]()
         

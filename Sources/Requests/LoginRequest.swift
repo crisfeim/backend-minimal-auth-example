@@ -1,7 +1,7 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 21/6/25.
 
 
-public struct LoginRequest {
+public struct LoginRequest: Codable {
     let email: String
     let password: String
     

@@ -24,12 +24,26 @@ final class AppTests: XCTestCase {
         )
         
         let registerPayload = try bufferFrom(RegisterRequest(email: "hi@crisfe.im", password: "123456"))
+        let loginPayload = try bufferFrom(RegisterRequest(email: "hi@crisfe.im", password: "123456"))
+        
         try await app.test(.router) { client in
             try await client.execute(
                 uri: "/register",
                 method: .post,
                 headers: [.init("Content-Type")!: "application/json"],
                 body: registerPayload
+            ) { response in
+
+                let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: response.body)
+                XCTAssertFalse(tokenResponse.token.isEmpty)
+                XCTAssertEqual(response.status, .ok)
+            }
+            
+            try await client.execute(
+                uri: "/login",
+                method: .post,
+                headers: [.init("Content-Type")!: "application/json"],
+                body: loginPayload
             ) { response in
 
                 let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: response.body)

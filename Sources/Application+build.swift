@@ -56,6 +56,19 @@ public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, 
             context: context
         )
     }
+    
+    router.post("/login") { request, context in
+        let registerRequest = try await request.decode(as: LoginRequest.self, context: context)
+        let result = try await coordinator.login(
+            email: registerRequest.email,
+            password: registerRequest.password
+        )
+        return try ResponseGeneratorEncoder.execute(
+            TokenResponse(token: result["token"]!),
+            from: request,
+            context: context
+        )
+    }
 
     let app = Application(
         router: router,

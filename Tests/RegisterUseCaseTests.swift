@@ -4,37 +4,6 @@ import XCTest
 import MinimalAuthExample
 
 class RegisterUseCaseTests: XCTestCase {
-    
-    class UserStoreSpy: UserStore {
-        private(set) var messages = [Message]()
-        
-        enum Message: Equatable {
-            case findUser(byEmail: String)
-            case saveUser(User)
-        }
-        
-        func saveUser(_ user: User) throws {
-            messages.append(.saveUser(user))
-        }
-        
-        func findUser(byEmail email: String) throws -> User? {
-            messages.append(.findUser(byEmail: email))
-            return nil
-        }
-    }
-    
-    struct UserStoreStub: UserStore {
-        let findUserResult: Result<User?, Error>
-        let saveResult: Result<Void, Error>
-        func findUser(byEmail email: String) throws -> User? {
-            try findUserResult.get()
-        }
-        
-        func saveUser(_ user: User) throws {
-            try saveResult.get()
-        }
-    }
-    
     func test_init_doesntMessagesStoreUponCreation() throws {
         let store = UserStoreSpy()
         let _ = makeSUT(store: store)
@@ -87,7 +56,7 @@ class RegisterUseCaseTests: XCTestCase {
         let token = try sut.register(email: "any-email", password: "any-password")
         XCTAssertEqual(token["token"], "any-provided-token")
     }
-
+    
     func makeSUT(
         store: UserStore,
         emailValidator: @escaping EmailValidator = { _ in true },
@@ -108,5 +77,39 @@ class RegisterUseCaseTests: XCTestCase {
     
     func anyUser() -> User {
         User(id: UUID(), email: "any-user@email.com", hashedPassword: "any-hashed-password")
+    }
+}
+
+
+// MARK: - Double
+private extension RegisterUseCaseTests {
+    class UserStoreSpy: UserStore {
+        private(set) var messages = [Message]()
+        
+        enum Message: Equatable {
+            case findUser(byEmail: String)
+            case saveUser(User)
+        }
+        
+        func saveUser(_ user: User) throws {
+            messages.append(.saveUser(user))
+        }
+        
+        func findUser(byEmail email: String) throws -> User? {
+            messages.append(.findUser(byEmail: email))
+            return nil
+        }
+    }
+    
+    struct UserStoreStub: UserStore {
+        let findUserResult: Result<User?, Error>
+        let saveResult: Result<Void, Error>
+        func findUser(byEmail email: String) throws -> User? {
+            try findUserResult.get()
+        }
+        
+        func saveUser(_ user: User) throws {
+            try saveResult.get()
+        }
     }
 }

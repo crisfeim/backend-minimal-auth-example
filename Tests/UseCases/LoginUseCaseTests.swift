@@ -47,6 +47,14 @@ class LoginUseCaseTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password"))
     }
     
+    func test_login_deliversErrorOnIncorrectPassword() async throws {
+        let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
+        let sut = makeSUT(store: store, passwordVerifier: { _, _ in false })
+        await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
+            XCTAssertTrue(error is RecipesApp.IncorrectPasswordError)
+        }
+    }
+    
     func test_login_deliversProvidedTokenOnCorrectCredentialsAndFoundUser() async throws {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
         let sut = makeSUT(store: store, tokenProvider: { _ in "any-provided-token" })

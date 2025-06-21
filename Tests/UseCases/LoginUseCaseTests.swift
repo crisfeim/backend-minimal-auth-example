@@ -67,7 +67,6 @@ class LoginUseCaseTests: XCTestCase {
         emailValidator: @escaping EmailValidator = { _ in true },
         passwordValidator: @escaping PasswordValidator = { _ in true },
         tokenProvider: @escaping AuthTokenProvider = { _ in "any-token" },
-        hasher: @escaping Hasher = { $0 },
         passwordVerifier: @escaping PasswordVerifier = { _,_ in true }
     ) -> RecipesApp {
         return RecipesApp(
@@ -75,7 +74,7 @@ class LoginUseCaseTests: XCTestCase {
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider,
-            hasher: hasher,
+            hasher: { $0 },
             passwordVerifier: passwordVerifier
         )
     }

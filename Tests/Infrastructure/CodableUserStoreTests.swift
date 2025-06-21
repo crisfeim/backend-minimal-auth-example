@@ -34,10 +34,6 @@ class CodableUserStoreTests: XCTestCase {
         XCTAssertEqual(foundUser, user)
     }
     
-    private func anyUser() -> User {
-        User(id: UUID(), email: "any@email.com", hashedPassword: "any hashed password")
-    }
-    
     private func cachesDirectory() -> URL {
         return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
     }

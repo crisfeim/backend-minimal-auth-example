@@ -56,14 +56,6 @@ class CreateRecipesUseCaseTests: XCTestCase {
         )
     }
     
-    func anyError() -> NSError {
-        NSError(domain: "any error", code: 0)
-    }
-    
-    func anyRecipe() -> Recipe {
-        Recipe(id: UUID(), userId: UUID(), title: "any-title")
-    }
-    
     struct RecipeStoreStub: RecipeStore {
         let result: Result<Recipe, Error>
         

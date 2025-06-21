@@ -91,13 +91,5 @@ class RegisterUseCaseTests: XCTestCase {
             passwordVerifier: { _,_ in true }
         )
     }
-    
-    func anyError() -> NSError {
-        NSError(domain: "any error", code: 0)
-    }
-    
-    func anyUser() -> User {
-        User(id: UUID(), email: "any-user@email.com", hashedPassword: "any-hashed-password")
-    }
 }
 

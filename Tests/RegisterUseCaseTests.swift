@@ -37,23 +37,26 @@ class RegisterUseCaseTests: XCTestCase {
     
     typealias EmailValidator  = (_ email: String) -> Bool
     typealias PasswordValidator = (_ password: String) -> Bool
+    typealias AuthTokenProvider = (_ email: String) -> String
     
     class RecipesApp {
         let store: UserStore
         let emailValidator: EmailValidator
         let passwordValidator: PasswordValidator
+        let tokenProvider: AuthTokenProvider
         
-        init(store: UserStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator) {
+        init(store: UserStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider) {
             self.store = store
             self.emailValidator = emailValidator
             self.passwordValidator = passwordValidator
+            self.tokenProvider = tokenProvider
         }
         
         struct UserAlreadyExists: Error {}
         struct InvalidEmailError: Error {}
         struct InvalidPasswordError: Error {}
         
-        func register(email: String, password: String) throws {
+        func register(email: String, password: String) throws -> [String: String] {
             guard try store.findUser(byEmail: email) == nil else {
                 throw UserAlreadyExists()
             }
@@ -67,6 +70,8 @@ class RegisterUseCaseTests: XCTestCase {
             }
             
             try store.saveUser(User(id: UUID(), email: email, hashedPassword: password))
+            let token = tokenProvider(email)
+            return ["token": token]
         }
     }
     
@@ -111,16 +116,29 @@ class RegisterUseCaseTests: XCTestCase {
         let sut = makeSUT(store: store, passwordValidator: { _ in false })
         XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password"))
     }
+    
+    func test_register_deliversProvidedTokenOnNewUserValidCredentialsAndUserStoreSuccess() throws {
+        let store = UserStoreStub(
+            findUserResult: .success(nil),
+            saveResult: .success(())
+        )
+        
+        let sut = makeSUT(store: store, tokenProvider: { _ in "any-provided-token" })
+        let token = try sut.register(email: "any-email", password: "any-password")
+        XCTAssertEqual(token["token"], "any-provided-token")
+    }
 
     func makeSUT(
         store: UserStore,
         emailValidator: @escaping EmailValidator = { _ in true },
-        passwordValidator: @escaping PasswordValidator = { _ in true }
+        passwordValidator: @escaping PasswordValidator = { _ in true },
+        tokenProvider: @escaping AuthTokenProvider = { _ in "any-token" }
     ) -> RecipesApp {
         return RecipesApp(
             store: store,
             emailValidator: emailValidator,
-            passwordValidator: passwordValidator
+            passwordValidator: passwordValidator,
+            tokenProvider: tokenProvider
         )
     }
     

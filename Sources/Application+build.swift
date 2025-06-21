@@ -35,7 +35,7 @@ func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeS
         recipeStore: CodableRecipeStore(storeURL: recipeStoreURL),
         emailValidator: { _ in true },
         passwordValidator: { _ in true },
-        tokenProvider:  tokenProvider.makeToken,
+        tokenProvider:  tokenProvider.execute,
         tokenVerifier: { _ in UUID() },
         passwordHasher: passwordHasher.execute,
         passwordVerifier: passwordVerifier.execute
@@ -71,7 +71,7 @@ struct TokenProvider {
     let kid: JWKIdentifier
     let jwtKeyCollection: JWTKeyCollection
     
-    func makeToken(userId: UUID, email: String) async throws -> String {
+    func execute(userId: UUID, email: String) async throws -> String {
         let payload = JWTPayloadData(
             subject: .init(value: userId.uuidString),
             expiration: .init(value: Date(timeIntervalSinceNow: 12 * 60 * 60)),

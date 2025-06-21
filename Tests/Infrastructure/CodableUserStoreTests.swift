@@ -3,7 +3,7 @@
 import XCTest
 import MinimalAuthExample
 
-class UserStoreTests: XCTestCase {
+class CodableUserStoreTests: XCTestCase {
     override func setUp() {
         try? FileManager.default.removeItem(at: testSpecificURL())
     }

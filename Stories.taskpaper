@@ -4,7 +4,7 @@ Register sad path:
     - System delivers error on invalid email @done
     - System delivers error on invalid password @done
 Register happy path:
-    - System delivers valid token
+    - System delivers valid token @done
 Login sad path:
     - System delivers error on user store error
     - System delivers error on invalid password

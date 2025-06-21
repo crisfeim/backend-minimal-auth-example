@@ -65,7 +65,9 @@ class GetRecipesUseCaseTests: XCTestCase {
         func findUser(byEmail email: String) throws -> User? {
             return nil
         }
-        func saveUser(_ user: User) throws {}
+        func saveUser(id: UUID, email: String, hashedPassword: String) throws {
+            
+        }
     }
     
     func anyRecipe() -> Recipe {

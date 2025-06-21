@@ -55,7 +55,7 @@ public class RecipesApp {
         }
         
         let hashedPassword = try await hasher(password)
-        try userStore.saveUser(User(id: UUID(), email: email, hashedPassword: hashedPassword))
+        try userStore.saveUser(id: UUID(), email: email, hashedPassword: hashedPassword)
         return ["token": tokenProvider(email)]
     }
     

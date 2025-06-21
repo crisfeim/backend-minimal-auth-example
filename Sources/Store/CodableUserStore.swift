@@ -8,21 +8,26 @@ public class CodableUserStore: UserStore {
         self.storeURL = storeURL
     }
     
-    public func get() throws -> [User] {
-        guard FileManager.default.fileExists(atPath: storeURL.path) else { return [] }
-        let data = try Data(contentsOf: storeURL)
-        return try JSONDecoder().decode([CodableStoredUser].self, from: data).map(UserMapper.map)
+    public func getUsers() throws -> [User] {
+        try get().map(UserMapper.map)
     }
     
-    public func saveUser(_ user: User) throws {
+    public func saveUser(id: UUID, email: String, hashedPassword: String) throws {
+        let user = CodableStoredUser(id: id, email: email, hashedPassword: hashedPassword)
         var users = try get()
         users.append(user)
-        let data = try JSONEncoder().encode(users.map(UserMapper.map))
+        let data = try JSONEncoder().encode(users)
         try data.write(to: storeURL)
     }
     
     public func findUser(byEmail email: String) throws -> User? {
-       return try get().first { $0.email == email }
+        return try get().first { $0.email == email }.map(UserMapper.map)
+    }
+    
+    private func get() throws -> [CodableStoredUser] {
+        guard FileManager.default.fileExists(atPath: storeURL.path) else { return [] }
+        let data = try Data(contentsOf: storeURL)
+        return try JSONDecoder().decode([CodableStoredUser].self, from: data)
     }
 }
 

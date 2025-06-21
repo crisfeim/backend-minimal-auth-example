@@ -12,24 +12,24 @@ class CodableUserStoreTests: XCTestCase {
         try? FileManager.default.removeItem(at: testSpecificURL())
     }
     
-    func test_get_deliversNoUsersOnEmptyStore() throws {
+    func test_getUsers_deliversNoUsersOnEmptyStore() throws {
         let sut = CodableUserStore(storeURL: testSpecificURL())
-        let users = try sut.get()
+        let users = try sut.getUsers()
         XCTAssertEqual(users, [])
     }
     
     func test_saveUser_savesUser() throws {
         let sut = CodableUserStore(storeURL: testSpecificURL())
         let user = anyUser()
-        try sut.saveUser(user)
-        let users = try sut.get()
+        try sut.saveUser(id: user.id, email: user.email, hashedPassword: user.hashedPassword)
+        let users = try sut.getUsers()
         XCTAssertEqual(users, [user])
     }
     
     func test_findUserByEmail_returnsUserIfExists() throws {
         let sut = CodableUserStore(storeURL: testSpecificURL())
         let user = User(id: UUID(), email: "hi@crisfe.im", hashedPassword: "hashedPassword")
-        try sut.saveUser(user)
+        try sut.saveUser(id: user.id, email: user.email, hashedPassword: user.hashedPassword)
         let foundUser = try sut.findUser(byEmail: "hi@crisfe.im")
         XCTAssertEqual(foundUser, user)
     }

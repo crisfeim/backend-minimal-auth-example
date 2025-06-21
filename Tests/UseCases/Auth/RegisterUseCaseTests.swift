@@ -119,11 +119,11 @@ private extension RegisterUseCaseTests {
         
         enum Message: Equatable {
             case findUser(byEmail: String)
-            case saveUser(User)
+            case saveUser(id: UUID, email: String, hashedPassword: String)
         }
         
-        func saveUser(_ user: User) throws {
-            messages.append(.saveUser(user))
+        func saveUser(id: UUID, email: String, hashedPassword: String) throws {
+            messages.append(.saveUser(id: id, email: email, hashedPassword: hashedPassword))
         }
         
         func findUser(byEmail email: String) throws -> User? {
@@ -139,7 +139,7 @@ private extension RegisterUseCaseTests {
             try findUserResult.get()
         }
         
-        func saveUser(_ user: User) throws {
+        func saveUser(id: UUID, email: String, hashedPassword: String) throws {
             try saveResult.get()
         }
     }

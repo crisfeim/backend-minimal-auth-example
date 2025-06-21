@@ -7,7 +7,14 @@ class CreateRecipesUseCaseTests: XCTestCase {
     func test_postRecipe_deliversErrorOnStoreError() async throws {
         let store = RecipeStoreStub(result: .failure(anyError()))
         let sut = makeSUT(store: store)
-        await XCTAssertThrowsErrorAsync(try await sut.createRecipe(title: "Fried chicken"))
+        await XCTAssertThrowsErrorAsync(try await sut.createRecipe(accessToken: "any valid access token", title: "Fried chicken"))
+    }
+    
+    func test_postRecipe_deliversErrorOnInvalidAccessToken() async throws {
+        let store = RecipeStoreStub(result: .success(anyRecipe()))
+        let sut = makeSUT(store: store, tokenVerifier: { _ in throw self.anyError() })
+        
+        await XCTAssertThrowsErrorAsync(try await sut.createRecipe(accessToken: "any valid access token", title: "Fried chicken"))
     }
     
     func makeSUT(
@@ -29,7 +36,10 @@ class CreateRecipesUseCaseTests: XCTestCase {
     struct RecipeStoreStub: RecipeStore {
         let result: Result<Recipe, Error>
         
-        func getRecipes() throws -> [Recipe] {[ ]}
+        func getRecipes() throws -> [Recipe] {
+            fatalError("should never be called within test case context")
+        }
+        
         func createRecipe(userId: UUID, title: String) throws -> Recipe {
             try result.get()
         }
@@ -44,5 +54,9 @@ class CreateRecipesUseCaseTests: XCTestCase {
     
     func anyError() -> NSError {
         NSError(domain: "any error", code: 0)
+    }
+    
+    func anyRecipe() -> Recipe {
+        Recipe(id: UUID(), userId: UUID(), title: "any-title")
     }
 }

@@ -86,7 +86,8 @@ public class RecipesApp {
         return recipes.filter { $0.userId == userId }
     }
     
-    public func createRecipe(title: String) async throws -> Recipe {
-        try recipeStore.createRecipe(userId: UUID(), title: title)
+    public func createRecipe(accessToken: String, title: String) async throws -> Recipe {
+        let userId = try await tokenVerifier(accessToken)
+        return try recipeStore.createRecipe(userId: userId, title: title)
     }
 }

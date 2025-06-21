@@ -12,7 +12,7 @@ public class CodableUserStore: UserStore {
         try get().map(UserMapper.map)
     }
     
-    public func saveUser(id: UUID, email: String, hashedPassword: String) throws {
+    public func createUser(id: UUID, email: String, hashedPassword: String) throws {
         let user = CodableStoredUser(id: id, email: email, hashedPassword: hashedPassword)
         var users = try get()
         users.append(user)

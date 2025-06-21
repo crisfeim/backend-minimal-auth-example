@@ -122,7 +122,7 @@ private extension RegisterUseCaseTests {
             case saveUser(id: UUID, email: String, hashedPassword: String)
         }
         
-        func saveUser(id: UUID, email: String, hashedPassword: String) throws {
+        func createUser(id: UUID, email: String, hashedPassword: String) throws {
             messages.append(.saveUser(id: id, email: email, hashedPassword: hashedPassword))
         }
         
@@ -139,7 +139,7 @@ private extension RegisterUseCaseTests {
             try findUserResult.get()
         }
         
-        func saveUser(id: UUID, email: String, hashedPassword: String) throws {
+        func createUser(id: UUID, email: String, hashedPassword: String) throws {
             try saveResult.get()
         }
     }

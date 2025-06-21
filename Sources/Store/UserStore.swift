@@ -3,6 +3,6 @@
 import Foundation
 
 public protocol UserStore {
-    func saveUser(id: UUID, email: String, hashedPassword: String) throws
+    func createUser(id: UUID, email: String, hashedPassword: String) throws
     func findUser(byEmail email: String) throws -> User?
 }

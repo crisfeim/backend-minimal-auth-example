@@ -10,7 +10,7 @@ public typealias Hasher = (_ input: String) async throws -> String
 public typealias PasswordVerifier = (_ password: String, _ hash: String) async throws -> Bool
 
 public protocol RecipeStore {
-   func getRecipes() throws -> [Recipe]
+    func getRecipes() throws -> [Recipe]
 }
 
 public class RecipesApp {
@@ -74,12 +74,14 @@ public class RecipesApp {
         guard try await passwordVerifier(password, user.hashedPassword) else {
             throw IncorrectPasswordError()
         }
-          
+        
         return ["token": tokenProvider(email)]
     }
     
     public func getRecipes(accessToken: String) async throws -> [Recipe] {
-       let _ = try await tokenVerifier(accessToken)
-       return try recipeStore.getRecipes()
+        let userId = try await tokenVerifier(accessToken)
+        let recipes = try recipeStore.getRecipes()
+
+        return recipes.filter { $0.userId == userId }
     }
 }

@@ -23,6 +23,16 @@ class RecipeHandlingUseCaseTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.getRecipes(accessToken: "any invalid access token"))
     }
     
+    func test_getRecipes_deliversUserRecipesOnCorrectAccessToken() async throws {
+        let user = User(id: UUID(), email: "any@email.com", hashedPassword: "1234")
+        let otherUserRecipes = [anyRecipe(), anyRecipe(), anyRecipe()]
+        let userRecipes = [Recipe(id: UUID(), userId: user.id)]
+        let store = RecipeStoreStub(result: .success(otherUserRecipes + userRecipes))
+        let sut = makeSUT(store: store, tokenVerifier: { _ in user.id })
+        let recipes = try await sut.getRecipes(accessToken: "anyvalidtoken")
+        XCTAssertEqual(userRecipes, recipes)
+    }
+    
     func makeSUT(
         store: RecipeStore,
         tokenVerifier: @escaping AuthTokenVerifier = { _ in UUID() },
@@ -52,6 +62,10 @@ class RecipeHandlingUseCaseTests: XCTestCase {
             return nil
         }
         func saveUser(_ user: User) throws {}
+    }
+    
+    func anyRecipe() -> Recipe {
+        Recipe(id: UUID(), userId: UUID())
     }
     
     func anyError() -> NSError {

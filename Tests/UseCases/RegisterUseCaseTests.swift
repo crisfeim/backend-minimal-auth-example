@@ -10,71 +10,82 @@ class RegisterUseCaseTests: XCTestCase {
         XCTAssertEqual(store.messages, [])
     }
     
-    func test_register_deliversErrorOnStoreSaveError() throws {
+    func test_register_deliversErrorOnStoreSaveError() async throws {
         let store = UserStoreStub(
             findUserResult: .success(anyUser()),
             saveResult: .failure(anyError())
         )
         let sut = makeSUT(store: store)
-        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password"))
+        await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password"))
     }
     
-    func test_register_deliversErrorOnAlreadyExistingUser() throws {
+    func test_register_deliversErrorOnAlreadyExistingUser() async throws {
         let store = UserStoreStub(
             findUserResult: .success(anyUser()),
             saveResult: .success(())
         )
         let sut = makeSUT(store: store)
-        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password")) { error in
+        await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
             XCTAssertTrue(error is RecipesApp.UserAlreadyExists)
         }
     }
     
-    func test_register_deliversErrorOnInvalidEmail() throws {
+    func test_register_deliversErrorOnInvalidEmail() async throws {
         let store = UserStoreStub(
             findUserResult: .success(nil),
             saveResult: .success(())
         )
         let sut = makeSUT(store: store, emailValidator: { _ in false })
-        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password")) { error in
+        await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
             
             XCTAssertTrue(error is RecipesApp.InvalidEmailError)
         }
     }
     
-    func test_register_deliversErrorOnInvalidPassword() throws {
+    func test_register_deliversErrorOnInvalidPassword() async throws {
         let store = UserStoreStub(
             findUserResult: .success(nil),
             saveResult: .success(())
         )
         let sut = makeSUT(store: store, passwordValidator: { _ in false })
-        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password")) { error in
+        await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
             XCTAssertTrue(error is RecipesApp.InvalidPasswordError)
         }
     }
     
-    func test_register_deliversProvidedTokenOnNewUserValidCredentialsAndUserStoreSuccess() throws {
+    func test_register_deliversProvidedTokenOnNewUserValidCredentialsAndUserStoreSuccess() async throws {
         let store = UserStoreStub(
             findUserResult: .success(nil),
             saveResult: .success(())
         )
         
         let sut = makeSUT(store: store, tokenProvider: { _ in "any-provided-token" })
-        let token = try sut.register(email: "any-email", password: "any-password")
+        let token = try await sut.register(email: "any-email", password: "any-password")
         XCTAssertEqual(token["token"], "any-provided-token")
+    }
+    
+    func test_register_deliversErrorOnHasherError() async throws {
+        let store = UserStoreStub(
+            findUserResult: .success(nil),
+            saveResult: .success(())
+        )
+        let sut = makeSUT(store: store, hasher: { _ in throw self.anyError() })
+        await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password"))
     }
     
     func makeSUT(
         store: UserStore,
         emailValidator: @escaping EmailValidator = { _ in true },
         passwordValidator: @escaping PasswordValidator = { _ in true },
-        tokenProvider: @escaping AuthTokenProvider = { _ in "any-token" }
+        tokenProvider: @escaping AuthTokenProvider = { $0 },
+        hasher: @escaping Hasher = { $0 }
     ) -> RecipesApp {
         return RecipesApp(
             userStore: store,
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
-            tokenProvider: tokenProvider
+            tokenProvider: tokenProvider,
+            hasher: hasher
         )
     }
     
@@ -118,5 +129,20 @@ private extension RegisterUseCaseTests {
         func saveUser(_ user: User) throws {
             try saveResult.get()
         }
+    }
+}
+
+private func XCTAssertThrowsErrorAsync<T>(
+    _ expression: @autoclosure () async throws -> T,
+    _ message: @autoclosure () -> String = "",
+    file: StaticString = #filePath,
+    line: UInt = #line,
+    _ errorHandler: (_ error: Error) -> Void = { _ in }
+) async {
+    do {
+        _ = try await expression()
+        XCTFail("Expected error to be thrown, but no error was thrown. \(message())", file: file, line: line)
+    } catch {
+        errorHandler(error)
     }
 }

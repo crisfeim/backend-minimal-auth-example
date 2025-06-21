@@ -5,18 +5,21 @@ import Foundation
 public typealias EmailValidator  = (_ email: String) -> Bool
 public typealias PasswordValidator = (_ password: String) -> Bool
 public typealias AuthTokenProvider = (_ email: String) -> String
+public typealias Hasher = (_ input: String) async throws -> String
 
 public class RecipesApp {
     private let userStore: UserStore
     private let emailValidator: EmailValidator
     private let passwordValidator: PasswordValidator
     private let tokenProvider: AuthTokenProvider
+    private let hasher: Hasher
     
-    public init(userStore: UserStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider) {
+    public init(userStore: UserStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider, hasher: @escaping Hasher) {
         self.userStore = userStore
         self.emailValidator = emailValidator
         self.passwordValidator = passwordValidator
         self.tokenProvider = tokenProvider
+        self.hasher = hasher
     }
     
     public struct UserAlreadyExists: Error {}
@@ -24,7 +27,7 @@ public class RecipesApp {
     public struct InvalidPasswordError: Error {}
     public struct NotFoundUserError: Error {}
     
-    public func register(email: String, password: String) throws -> [String: String] {
+    public func register(email: String, password: String) async throws -> [String: String] {
         guard try userStore.findUser(byEmail: email) == nil else {
             throw UserAlreadyExists()
         }
@@ -37,7 +40,8 @@ public class RecipesApp {
             throw InvalidPasswordError()
         }
         
-        try userStore.saveUser(User(id: UUID(), email: email, hashedPassword: password))
+        let hashedPassword = try await hasher(password)
+        try userStore.saveUser(User(id: UUID(), email: email, hashedPassword: hashedPassword))
         return ["token": tokenProvider(email)]
     }
     

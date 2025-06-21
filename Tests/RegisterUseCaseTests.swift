@@ -25,7 +25,9 @@ class RegisterUseCaseTests: XCTestCase {
             saveResult: .success(())
         )
         let sut = makeSUT(store: store)
-        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password"))
+        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password")) { error in
+            XCTAssertTrue(error is RecipesApp.UserAlreadyExists)
+        }
     }
     
     func test_register_deliversErrorOnInvalidEmail() throws {
@@ -34,7 +36,10 @@ class RegisterUseCaseTests: XCTestCase {
             saveResult: .success(())
         )
         let sut = makeSUT(store: store, emailValidator: { _ in false })
-        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password"))
+        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password")) { error in
+            
+            XCTAssertTrue(error is RecipesApp.InvalidEmailError)
+        }
     }
     
     func test_register_deliversErrorOnInvalidPassword() throws {
@@ -43,7 +48,9 @@ class RegisterUseCaseTests: XCTestCase {
             saveResult: .success(())
         )
         let sut = makeSUT(store: store, passwordValidator: { _ in false })
-        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password"))
+        XCTAssertThrowsError(try sut.register(email: "any-email", password: "any-password")) { error in
+            XCTAssertTrue(error is RecipesApp.InvalidPasswordError)
+        }
     }
     
     func test_register_deliversProvidedTokenOnNewUserValidCredentialsAndUserStoreSuccess() throws {

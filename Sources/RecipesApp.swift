@@ -29,6 +29,7 @@ public class RecipesApp {
     public struct InvalidEmailError: Error {}
     public struct InvalidPasswordError: Error {}
     public struct NotFoundUserError: Error {}
+    public struct IncorrectPasswordError: Error {}
     
     public func register(email: String, password: String) async throws -> [String: String] {
         guard try userStore.findUser(byEmail: email) == nil else {
@@ -61,7 +62,9 @@ public class RecipesApp {
             throw NotFoundUserError()
         }
         
-        let _ = try await passwordVerifier(password, user.hashedPassword)
+        guard try await passwordVerifier(password, user.hashedPassword) else {
+            throw IncorrectPasswordError()
+        }
           
         return ["token": tokenProvider(email)]
     }

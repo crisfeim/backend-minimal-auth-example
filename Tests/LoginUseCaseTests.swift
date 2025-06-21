@@ -41,6 +41,13 @@ class LoginUseCaseTests: XCTestCase {
         }
     }
     
+    func test_login_deliversProvidedTokenOnCorrectCredentialsAndFoundUser() throws {
+        let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
+        let sut = makeSUT(store: store, tokenProvider: { _ in "any-provided-token" })
+        let token = try sut.login(email: "any-email", password: "any-password")
+        XCTAssertEqual(token["token"], "any-provided-token")
+    }
+    
     func makeSUT(
         store: UserStore,
         emailValidator: @escaping EmailValidator = { _ in true },

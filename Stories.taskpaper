@@ -3,6 +3,7 @@ Register sad path:
     - System delivers error on already existent user @done
     - System delivers error on invalid email @done
     - System delivers error on invalid password @done
+    - System delivers error on hasher error @done
 Register happy path:
     - System delivers valid token @done
 Login sad path:
@@ -10,6 +11,7 @@ Login sad path:
     - System delivers error on invalid email @done
     - System delivers error on invalid password @done
     - System delivers error on non existent user @done
+    - System delivers error on incorect password
 Login happy path:
     - System delivers valid token @done
 Get recipes sad path:

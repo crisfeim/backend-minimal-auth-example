@@ -43,7 +43,7 @@ class RecipesApp {
         return ["token": token]
     }
     
-    func login(email: String, password: String) throws {
+    func login(email: String, password: String) throws -> [String: String] {
         guard emailValidator(email) else {
             throw InvalidEmailError()
         }
@@ -55,5 +55,7 @@ class RecipesApp {
         guard let _ = try store.findUser(byEmail: email) else {
             throw NotFoundUserError()
         }
+        
+        return ["token": tokenProvider(email)]
     }
 }

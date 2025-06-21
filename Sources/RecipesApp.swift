@@ -6,6 +6,7 @@ public typealias EmailValidator  = (_ email: String) -> Bool
 public typealias PasswordValidator = (_ password: String) -> Bool
 public typealias AuthTokenProvider = (_ email: String) -> String
 public typealias Hasher = (_ input: String) async throws -> String
+public typealias PasswordVerifier = (_ password: String, _ hash: String) async throws -> Bool
 
 public class RecipesApp {
     private let userStore: UserStore
@@ -13,13 +14,15 @@ public class RecipesApp {
     private let passwordValidator: PasswordValidator
     private let tokenProvider: AuthTokenProvider
     private let hasher: Hasher
+    private let passwordVerifier: PasswordVerifier
     
-    public init(userStore: UserStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider, hasher: @escaping Hasher) {
+    public init(userStore: UserStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider, hasher: @escaping Hasher, passwordVerifier: @escaping PasswordVerifier) {
         self.userStore = userStore
         self.emailValidator = emailValidator
         self.passwordValidator = passwordValidator
         self.tokenProvider = tokenProvider
         self.hasher = hasher
+        self.passwordVerifier = passwordVerifier
     }
     
     public struct UserAlreadyExists: Error {}
@@ -45,7 +48,7 @@ public class RecipesApp {
         return ["token": tokenProvider(email)]
     }
     
-    public func login(email: String, password: String) throws -> [String: String] {
+    public func login(email: String, password: String) async throws -> [String: String] {
         guard emailValidator(email) else {
             throw InvalidEmailError()
         }
@@ -54,10 +57,12 @@ public class RecipesApp {
             throw InvalidPasswordError()
         }
         
-        guard let _ = try userStore.findUser(byEmail: email) else {
+        guard let user = try userStore.findUser(byEmail: email) else {
             throw NotFoundUserError()
         }
         
+        let _ = try await passwordVerifier(password, user.hashedPassword)
+          
         return ["token": tokenProvider(email)]
     }
 }

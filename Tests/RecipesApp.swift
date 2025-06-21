@@ -39,8 +39,7 @@ class RecipesApp {
         }
         
         try store.saveUser(User(id: UUID(), email: email, hashedPassword: password))
-        let token = tokenProvider(email)
-        return ["token": token]
+        return ["token": tokenProvider(email)]
     }
     
     func login(email: String, password: String) throws -> [String: String] {

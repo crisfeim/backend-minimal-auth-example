@@ -5,6 +5,7 @@ import Testing
 
 @Suite("Register Use Case Tests")
 struct RegisterUseCaseTests {
+   
     @Test("Test delivers internal server error on store error")
     func postRegister_deliversInternalServerErrorOnUserStoreError() async throws {
         let store = AlwaysFailingUserStore()
@@ -35,6 +36,25 @@ struct RegisterUseCaseTests {
                 #expect(res.status == .ok)
                 #expect(store.capturedUsers.first?.email == "test@example.com")
             })
+        }
+    }
+    
+    @Test("Register delivers token on success")
+    func postRegister_deliversTokenOnSuccessfulRegistration() async throws {
+        let store = UserStoreSpy()
+        try await withApp(configure: configure(userStore: store)) { app in
+            let body = RegisterRequest(email: "test@example.com", password: "123456")
+            let buffer = try body.encodeToByteBuffer(using: app.allocator)
+
+            try await app.testing().test(
+                .POST,
+                "register",
+                headers: ["Content-Type": "application/json"],
+                body: buffer
+            ) { res async throws in
+                let token = try? res.content.decode(TokenResponse.self)
+                #expect(token != nil)
+            }
         }
     }
     

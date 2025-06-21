@@ -7,8 +7,8 @@ import Testing
 @Suite("App Tests")
 struct LoginUseCaseTests {
     
-    @Test("Login delivers error on user store error")
-    func loginDeliverErrorOnUserStoreError() async throws {
+    @Test("Login delivers internal server error on user store error")
+    func postLogin_deliverErrorOnUserStoreError() async throws {
         let store = AlwaysFailingUserStore()
         
         try await withApp(configure: configure(userStore: store)) { app in

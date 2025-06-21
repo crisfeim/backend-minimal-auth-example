@@ -5,8 +5,8 @@ import Testing
 
 @Suite("Register Use Case Tests")
 struct RegisterUseCaseTests {
-    @Test("Test delivers registration error on store failure")
-    func deliversRegistrationErrorOnUserStoreFailure() async throws {
+    @Test("Test delivers internal server error on store error")
+    func postRegister_deliversInternalServerErrorOnUserStoreError() async throws {
         let store = AlwaysFailingUserStore()
         
         try await withApp(configure: configure(userStore: store)) { app in
@@ -19,8 +19,8 @@ struct RegisterUseCaseTests {
         }
     }
     
-    @Test("Test delivers registration success on store success")
-    func deliversRegistrationSuccessOnUserStoreSuccess() async throws {
+    @Test("Test delivers delivers no error and request user saving on store success")
+    func postRegister_deliversNoErrorAndPassesRequestedUserToUserStoreOnUserStoreSuccess() async throws {
         let store = UserStoreSpy()
         try await withApp(configure: configure(userStore: store)) { app in
             let registerBody = RegisterRequest(email: "test@example.com", password: "123456")

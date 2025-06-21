@@ -27,6 +27,7 @@ func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeS
     )
     
     let tokenProvider = TokenProvider(kid: JWKIdentifier("auth-jwt"), jwtKeyCollection: jwtKeyCollection)
+    let tokenVerifier = TokenVerifier(jwtKeyCollection: jwtKeyCollection)
     let passwordHasher = BCryptPasswordHasher()
     let passwordVerifier = BCryptPasswordVerifier()
     
@@ -36,7 +37,7 @@ func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeS
         emailValidator: { _ in true },
         passwordValidator: { _ in true },
         tokenProvider:  tokenProvider.execute,
-        tokenVerifier: { _ in UUID() },
+        tokenVerifier: tokenVerifier.execute,
         passwordHasher: passwordHasher.execute,
         passwordVerifier: passwordVerifier.execute
     )
@@ -99,4 +100,18 @@ struct BCryptPasswordVerifier {
     }
 }
 
+struct TokenVerifier {
+    let jwtKeyCollection: JWTKeyCollection
+
+    func execute(_ token: String) async throws -> UUID {
+        let payload = try await jwtKeyCollection.verify(token, as: JWTPayloadData.self)
+        
+        guard let uuid = UUID(uuidString: payload.subject.value) else {
+            throw InvalidSubjectError()
+        }
+        return uuid
+    }
+
+    struct InvalidSubjectError: Error {}
+}
 

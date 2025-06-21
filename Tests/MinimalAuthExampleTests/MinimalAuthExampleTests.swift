@@ -3,10 +3,7 @@ import VaporTesting
 import Testing
 
 
-struct RegisterRequest: Content {
-    let email: String
-    let password: String
-}
+
 
 import Vapor
 
@@ -22,7 +19,7 @@ extension Encodable {
 @Suite("App Tests")
 struct MinimalAuthExampleTests {
     @Test("Test delivers registration error on store failure")
-    func deliversRegistrationErrorOnStoreFailure() async throws {
+    func deliversRegistrationErrorOnUserStoreFailure() async throws {
         let store = AlwaysFailingUserStore()
 
         try await withApp(configure: configure(userStore: store)) { app in
@@ -35,6 +32,20 @@ struct MinimalAuthExampleTests {
         }
     }
     
+    @Test("Test delivers registration success on store success")
+    func deliversRegistrationSuccessOnUserStoreSuccess() async throws {
+        let store = UserStoreSpy()
+        try await withApp(configure: configure(userStore: store)) { app in
+            let registerBody = RegisterRequest(email: "test@example.com", password: "123456")
+            let buffer = try registerBody.encodeToByteBuffer(using: app.allocator)
+            
+            try await app.testing().test(.POST, "register", headers: ["Content-Type": "application/json"], body: buffer, afterResponse: { res async in
+                #expect(res.status == .ok)
+                #expect(store.capturedUsers.first?.email == "test@example.com")
+            })
+        }
+    }
+    
     struct AlwaysFailingUserStore: UserStore {
         func findUser(byEmail email: String) throws -> User? {
             throw NSError(domain: "any error", code: 0)
@@ -42,6 +53,18 @@ struct MinimalAuthExampleTests {
         
         func saveUser(_ user: User) throws {
             throw NSError(domain: "any error", code: 0)
+        }
+    }
+    
+    class UserStoreSpy: UserStore {
+        var capturedUsers = [User]()
+        
+        func findUser(byEmail email: String) throws -> User? {
+            nil
+        }
+        
+        func saveUser(_ user: User) throws {
+            capturedUsers.append(user)
         }
     }
 }

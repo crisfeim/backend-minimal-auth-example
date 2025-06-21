@@ -1,12 +1,14 @@
 import Vapor
 
 func routes(_ app: Application, userStore: any UserStore) throws {
-    app.post("register") { req async -> HTTPStatus in
+    app.post("register") { req async throws -> HTTPStatus in
         do {
-            try userStore.saveUser(User(id: UUID(), email: ""))
+            let data = try req.content.decode(RegisterRequest.self)
+            let user = User(id: UUID(), email: data.email)
+            try userStore.saveUser(user)
             return .ok
         } catch {
-            return .internalServerError
+            throw Abort(.internalServerError, reason: "Failed to save user")
         }
     }
 }

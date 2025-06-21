@@ -26,7 +26,12 @@ struct RegisterUseCaseTests {
             let registerBody = RegisterRequest(email: "test@example.com", password: "123456")
             let buffer = try registerBody.encodeToByteBuffer(using: app.allocator)
             
-            try await app.testing().test(.POST, "register", headers: ["Content-Type": "application/json"], body: buffer, afterResponse: { res async in
+            try await app.testing().test(
+                .POST,
+                "register",
+                headers: ["Content-Type": "application/json"],
+                body: buffer,
+                afterResponse: { res async in
                 #expect(res.status == .ok)
                 #expect(store.capturedUsers.first?.email == "test@example.com")
             })
@@ -70,15 +75,3 @@ func configure(userStore: any UserStore) -> Configure {
     }
 }
 
-
-// MARK: - Encodable
-import Vapor
-
-private extension Encodable {
-    func encodeToByteBuffer(using allocator: ByteBufferAllocator) throws -> ByteBuffer {
-        let data = try JSONEncoder().encode(self)
-        var buffer = allocator.buffer(capacity: data.count)
-        buffer.writeBytes(data)
-        return buffer
-    }
-}

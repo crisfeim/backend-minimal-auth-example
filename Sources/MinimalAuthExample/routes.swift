@@ -11,4 +11,14 @@ func routes(_ app: Application, userStore: any UserStore) throws {
             throw Abort(.internalServerError, reason: "Failed to save user")
         }
     }
+    
+    app.post("login") { req async throws -> HTTPStatus in
+        do {
+            let data = try req.content.decode(LoginRequest.self)
+            let _ = try userStore.findUser(byEmail: data.email)
+            return .ok
+        } catch {
+            throw Abort(.internalServerError, reason: "Failed finding user")
+        }
+    }
 }

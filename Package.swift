@@ -4,37 +4,33 @@ import PackageDescription
 let package = Package(
     name: "MinimalAuthExample",
     platforms: [
-       .macOS(.v13)
+        .macOS(.v14)
     ],
     dependencies: [
-        // 💧 A server-side Swift web framework.
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.115.0"),
-        // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
-        .package(url: "https://github.com/vapor/jwt.git", from: "5.0.0")
+        .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.4.0"),
     ],
     targets: [
         .executableTarget(
             name: "MinimalAuthExample",
             dependencies: [
-                .product(name: "Vapor", package: "vapor"),
-                .product(name: "NIOCore", package: "swift-nio"),
-                .product(name: "NIOPosix", package: "swift-nio"),
-                .product(name: "JWT", package: "jwt")
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "Hummingbird", package: "hummingbird"),
             ],
-            swiftSettings: swiftSettings
+            swiftSettings: [
+                // Enable better optimizations when building in Release configuration. Despite the use of
+                // the `.unsafeFlags` construct required by SwiftPM, this flag is recommended for Release
+                // builds. See <https://github.com/swift-server/guides#building-for-production> for details.
+                .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release)),
+            ]
         ),
         .testTarget(
             name: "MinimalAuthExampleTests",
             dependencies: [
                 .target(name: "MinimalAuthExample"),
-                .product(name: "VaporTesting", package: "vapor"),
-            ],
-            swiftSettings: swiftSettings
+                .product(name: "Hummingbird", package: "hummingbird"),
+                .product(name: "HummingbirdTesting", package: "hummingbird"),
+            ]
         )
     ]
 )
-
-var swiftSettings: [SwiftSetting] { [
-    .enableUpcomingFeature("ExistentialAny"),
-] }

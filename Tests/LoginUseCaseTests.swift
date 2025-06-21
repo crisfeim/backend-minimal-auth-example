@@ -25,6 +25,14 @@ class LoginUseCaseTests: XCTestCase {
         }
     }
     
+    func test_login_deliversErrorOnInvalidEmail() throws {
+        let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
+        let sut = makeSUT(store: store, emailValidator: { _ in false })
+        XCTAssertThrowsError(try sut.login(email: "any-email", password: "any-password")) { error in
+            XCTAssertTrue(error is RecipesApp.InvalidEmailError)
+        }
+    }
+    
     func makeSUT(
         store: UserStore,
         emailValidator: @escaping EmailValidator = { _ in true },
@@ -41,6 +49,10 @@ class LoginUseCaseTests: XCTestCase {
     
     func anyError() -> NSError {
         NSError(domain: "any error", code: 0)
+    }
+    
+    func anyUser() -> User {
+        User(id: UUID(), email: "any-user@email.com", hashedPassword: "any-hashed-password")
     }
 }
 

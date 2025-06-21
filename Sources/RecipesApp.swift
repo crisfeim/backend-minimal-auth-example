@@ -5,9 +5,9 @@ import Foundation
 public typealias EmailValidator  = (_ email: String) -> Bool
 public typealias PasswordValidator = (_ password: String) -> Bool
 public typealias AuthTokenProvider = (_ email: String) -> String
+public typealias AuthTokenVerifier = (_ token: String) async throws -> String
 public typealias Hasher = (_ input: String) async throws -> String
 public typealias PasswordVerifier = (_ password: String, _ hash: String) async throws -> Bool
-
 
 public protocol RecipeStore {
    func getRecipes() throws -> [Recipe]
@@ -19,15 +19,17 @@ public class RecipesApp {
     private let emailValidator: EmailValidator
     private let passwordValidator: PasswordValidator
     private let tokenProvider: AuthTokenProvider
+    private let tokenVerifier: AuthTokenVerifier
     private let hasher: Hasher
     private let passwordVerifier: PasswordVerifier
     
-    public init(userStore: UserStore, recipeStore: RecipeStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider, hasher: @escaping Hasher, passwordVerifier: @escaping PasswordVerifier) {
+    public init(userStore: UserStore, recipeStore: RecipeStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider, tokenVerifier: @escaping AuthTokenVerifier, hasher: @escaping Hasher, passwordVerifier: @escaping PasswordVerifier) {
         self.userStore = userStore
         self.recipeStore = recipeStore
         self.emailValidator = emailValidator
         self.passwordValidator = passwordValidator
         self.tokenProvider = tokenProvider
+        self.tokenVerifier = tokenVerifier
         self.hasher = hasher
         self.passwordVerifier = passwordVerifier
     }
@@ -76,7 +78,8 @@ public class RecipesApp {
         return ["token": tokenProvider(email)]
     }
     
-    public func getRecipes() throws -> [Recipe] {
-       try recipeStore.getRecipes()
+    public func getRecipes(accessToken: String) async throws -> [Recipe] {
+       let _ = try await tokenVerifier(accessToken)
+       return try recipeStore.getRecipes()
     }
 }

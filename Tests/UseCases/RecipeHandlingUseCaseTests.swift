@@ -5,14 +5,21 @@ import MinimalAuthExample
 
 class RecipeHandlingUseCaseTests: XCTestCase {
    
-    func test_getRecipes_deliversErrorOnStoreError() throws {
+    func test_getRecipes_deliversErrorOnStoreError() async throws {
         let store = RecipeStoreStub(result: .failure(anyError()))
         let sut = makeSUT(store: store)
-        XCTAssertThrowsError(try sut.getRecipes())
+        await XCTAssertThrowsErrorAsync(try await sut.getRecipes(accessToken: "any valid access token"))
+    }
+    
+    func test_getRecipes_deliversErrorOnTokenVerifierError() async throws {
+        let store = RecipeStoreStub(result: .success([]))
+        let sut = makeSUT(store: store, tokenVerifier: { _ in throw self.anyError() })
+        await XCTAssertThrowsErrorAsync(try await sut.getRecipes(accessToken: "any invalid access token"))
     }
     
     func makeSUT(
-        store: RecipeStore
+        store: RecipeStore,
+        tokenVerifier: @escaping AuthTokenVerifier = { $0 },
     ) -> RecipesApp {
         return RecipesApp(
             userStore: DummyUserStore(),
@@ -20,6 +27,7 @@ class RecipeHandlingUseCaseTests: XCTestCase {
             emailValidator: { _ in true },
             passwordValidator: { _ in true },
             tokenProvider: { $0 },
+            tokenVerifier: tokenVerifier,
             hasher: { $0 },
             passwordVerifier: { _,_ in true }
         )

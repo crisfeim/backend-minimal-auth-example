@@ -16,8 +16,7 @@ func makeApp(configuration: ApplicationConfiguration) -> some ApplicationProtoco
     return app
 }
 
-func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeStoreURL: URL) async -> some ApplicationProtocol {
-    
+public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeStoreURL: URL) async -> some ApplicationProtocol {
     
     let jwtKeyCollection = JWTKeyCollection()
     await jwtKeyCollection.add(
@@ -31,7 +30,7 @@ func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeS
     let passwordHasher = BCryptPasswordHasher()
     let passwordVerifier = BCryptPasswordVerifier()
     
-    let _ = RecipesApp(
+    let coordinator = RecipesApp(
         userStore: CodableUserStore(storeURL: userStoreURL),
         recipeStore: CodableRecipeStore(storeURL: recipeStoreURL),
         emailValidator: { _ in true },
@@ -43,8 +42,19 @@ func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeS
     )
     
     let router = Router()
-    router.get("/") { _, _ in
-        return "Hello"
+    router.post("/register") {
+        request,
+        context in
+        let registerRequest = try await request.decode(as: RegisterRequest.self, context: context)
+        let result = try await coordinator.register(
+            email: registerRequest.email,
+            password: registerRequest.password
+        )
+        return try ResponseGeneratorEncoder.execute(
+            TokenResponse(token: result["token"]!),
+            from: request,
+            context: context
+        )
     }
 
     let app = Application(
@@ -115,3 +125,25 @@ struct TokenVerifier {
     struct InvalidSubjectError: Error {}
 }
 
+
+import Foundation
+import Hummingbird
+
+enum ResponseGeneratorEncoder {
+    static func execute<T: Encodable>(_ encodable: T, from request: Request, context: some RequestContext) throws -> Response {
+        let data = try JSONEncoder().encode(encodable)
+        var buffer = ByteBufferAllocator().buffer(capacity: data.count)
+        buffer.writeBytes(data)
+        
+        var headers = HTTPFields()
+        headers.reserveCapacity(4)
+        headers.append(.init(name: .contentType, value: "application/json"))
+        headers.append(.init(name: .contentLength, value: buffer.readableBytes.description))
+
+        return Response(
+            status: .ok,
+            headers: headers,
+            body: .init(byteBuffer: buffer)
+        )
+    }
+}

@@ -17,7 +17,11 @@ final class CodableStore<T: Codable> {
     }
     
     func get() throws -> [T] {
-        guard FileManager.default.fileExists(atPath: storeURL.path) else { return [] }
+        guard FileManager.default.fileExists(atPath: storeURL.path) else {
+            let directory = storeURL.deletingLastPathComponent()
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            return []
+        }
         let data = try Data(contentsOf: storeURL)
         return try JSONDecoder().decode([T].self, from: data)
     }

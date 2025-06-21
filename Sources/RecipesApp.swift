@@ -11,7 +11,7 @@ public typealias PasswordVerifier = (_ password: String, _ hash: String) async t
 
 
 
-public class RecipesApp {
+public class RecipesApp: @unchecked Sendable {
     private let userStore: UserStore
     private let recipeStore: RecipeStore
     private let emailValidator: EmailValidator

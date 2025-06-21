@@ -1,7 +1,7 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 21/6/25.
 import Foundation
 
-public struct Recipe: Equatable {
+public struct Recipe: Equatable, Codable {
     let id: UUID
     public let userId: UUID
     public let title: String

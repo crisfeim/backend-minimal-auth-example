@@ -69,6 +69,24 @@ public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, 
             context: context
         )
     }
+    
+    router.post("/recipes") { request, context in
+        guard let authHeader = request.headers[values: .init("Authorization")!].first,
+              authHeader.starts(with: "Bearer "),
+              let token = authHeader.split(separator: " ").last.map(String.init)
+        else {
+            return Response(status: .unauthorized)
+        }
+        
+        let recipeRequest = try await request.decode(as: CreateRecipeRequest.self, context: context)
+        
+        let recipe = try await coordinator.createRecipe(
+            accessToken: token,
+            title: recipeRequest.title
+        )
+        
+        return try ResponseGeneratorEncoder.execute(recipe, from: request, context: context)
+    }
 
     let app = Application(
         router: router,

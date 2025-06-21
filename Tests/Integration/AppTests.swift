@@ -27,6 +27,7 @@ final class AppTests: XCTestCase {
         let loginPayload = try bufferFrom(RegisterRequest(email: "hi@crisfe.im", password: "123456"))
         
         try await app.test(.router) { client in
+            
             try await client.execute(
                 uri: "/register",
                 method: .post,
@@ -49,16 +50,25 @@ final class AppTests: XCTestCase {
                 let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: response.body)
                 XCTAssertFalse(tokenResponse.token.isEmpty)
                 XCTAssertEqual(response.status, .ok)
+                
+                let postRecipePayLoad = try bufferFrom(CreateRecipeRequest(title: "Test recipe"))
+                
+                try await client.execute(
+                    uri: "/recipes",
+                    method: .post,
+                    headers: [
+                        .init("Content-Type")!: "application/json",
+                        .init("Authorization")!: "Bearer \(tokenResponse.token)"
+                    ],
+                    body: postRecipePayLoad
+                ) { response in
+                    let recipe = try JSONDecoder().decode(Recipe.self, from: response.body)
+                    XCTAssertEqual(recipe.title, "Test recipe")
+                }
             }
         }
     }
-    
-    func bufferFrom<T: Encodable>(_ payload: T) throws -> ByteBuffer {
-        let data = try JSONEncoder().encode(payload)
-        var buffer = ByteBufferAllocator().buffer(capacity: data.count)
-        buffer.writeBytes(data)
-        return buffer
-    }
+
     
     private func cachesDirectory() -> URL {
         return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
@@ -67,4 +77,11 @@ final class AppTests: XCTestCase {
     private func testSpecificURL() -> URL {
         cachesDirectory().appendingPathComponent("\(type(of: self))")
     }
+}
+
+private func bufferFrom<T: Encodable>(_ payload: T) throws -> ByteBuffer {
+    let data = try JSONEncoder().encode(payload)
+    var buffer = ByteBufferAllocator().buffer(capacity: data.count)
+    buffer.writeBytes(data)
+    return buffer
 }

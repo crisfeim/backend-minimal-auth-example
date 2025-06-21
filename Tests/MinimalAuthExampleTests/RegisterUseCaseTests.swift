@@ -3,8 +3,8 @@ import VaporTesting
 import Testing
 
 
-@Suite("App Tests")
-struct MinimalAuthExampleTests {
+@Suite("Register Use Case Tests")
+struct RegisterUseCaseTests {
     @Test("Test delivers registration error on store failure")
     func deliversRegistrationErrorOnUserStoreFailure() async throws {
         let store = AlwaysFailingUserStore()
@@ -36,7 +36,7 @@ struct MinimalAuthExampleTests {
 }
 
 // MARK: - Test doubles
-extension MinimalAuthExampleTests {
+extension RegisterUseCaseTests {
     struct AlwaysFailingUserStore: UserStore {
         func findUser(byEmail email: String) throws -> User? {
             throw NSError(domain: "any error", code: 0)

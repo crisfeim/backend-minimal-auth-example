@@ -4,9 +4,11 @@ import Foundation
 public struct User: Equatable {
     let id: UUID
     let email: String
+    let hashedPassword: String
     
-    public init(id: UUID, email: String) {
+    public init(id: UUID, email: String, hashedPassword: String) {
         self.id = id
         self.email = email
+        self.hashedPassword = hashedPassword
     }
 }

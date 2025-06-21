@@ -30,14 +30,15 @@ public class CodableUserStore: UserStore {
 private struct CodableStoredUser: Codable {
     let id: UUID
     let email: String
+    let hashedPassword: String
 }
 
 private enum UserMapper {
     static func map(_ user: CodableStoredUser) -> User {
-        User(id: user.id, email: user.email)
+        User(id: user.id, email: user.email, hashedPassword: user.hashedPassword)
     }
     
     static func map(_ user: User) -> CodableStoredUser {
-        CodableStoredUser(id: user.id, email: user.email)
+        CodableStoredUser(id: user.id, email: user.email, hashedPassword: user.hashedPassword)
     }
 }

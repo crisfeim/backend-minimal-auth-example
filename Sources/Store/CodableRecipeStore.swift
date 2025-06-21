@@ -9,16 +9,8 @@ public class CodableRecipeStore {
         self.storeURL = storeURL
     }
     
-    private struct CodableRecipe: Codable {
-        let id: UUID
-        let userId: UUID
-        let title: String
-    }
-    
     public func getRecipes() throws -> [Recipe] {
-        try get().map {
-            Recipe(id: $0.id, userId: $0.userId, title: $0.title)
-        }
+        try get().map(RecipeMapper.map)
     }
     
     public func createRecipe(userId: UUID, title: String) throws -> Recipe {
@@ -27,7 +19,7 @@ public class CodableRecipeStore {
         recipes.append(recipe)
         let data = try JSONEncoder().encode(recipes)
         try data.write(to: storeURL)
-        return Recipe(id: recipe.id, userId: recipe.userId, title: recipe.title)
+        return RecipeMapper.map(recipe)
     }
     
     private func get() throws -> [CodableRecipe] {
@@ -37,3 +29,27 @@ public class CodableRecipeStore {
     }
 }
 
+private struct CodableRecipe: Codable {
+    let id: UUID
+    let userId: UUID
+    let title: String
+}
+
+
+private enum RecipeMapper {
+    static func map(_ recipe: Recipe) -> CodableRecipe {
+        CodableRecipe(
+            id: recipe.id,
+            userId: recipe.userId,
+            title: recipe.title
+        )
+    }
+    
+    static func map(_ recipe: CodableRecipe) -> Recipe {
+        Recipe(
+            id: recipe.id,
+            userId: recipe.userId,
+            title: recipe.title
+        )
+    }
+}

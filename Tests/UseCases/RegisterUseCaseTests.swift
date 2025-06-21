@@ -86,7 +86,7 @@ class RegisterUseCaseTests: XCTestCase {
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider,
-            tokenVerifier: { $0 },
+            tokenVerifier: { _ in UUID() },
             hasher: hasher,
             passwordVerifier: { _,_ in true }
         )

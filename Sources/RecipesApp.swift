@@ -5,7 +5,7 @@ import Foundation
 public typealias EmailValidator  = (_ email: String) -> Bool
 public typealias PasswordValidator = (_ password: String) -> Bool
 public typealias AuthTokenProvider = (_ email: String) -> String
-public typealias AuthTokenVerifier = (_ token: String) async throws -> String
+public typealias AuthTokenVerifier = (_ token: String) async throws -> UUID
 public typealias Hasher = (_ input: String) async throws -> String
 public typealias PasswordVerifier = (_ password: String, _ hash: String) async throws -> Bool
 

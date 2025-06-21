@@ -17,9 +17,15 @@ class RecipeHandlingUseCaseTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.getRecipes(accessToken: "any invalid access token"))
     }
     
+    func test_getRecipes_deliversErrorOnInvalidAccessToken() async throws {
+        let store = RecipeStoreStub(result: .success([]))
+        let sut = makeSUT(store: store, tokenVerifier: { _ in throw self.anyError() })
+        await XCTAssertThrowsErrorAsync(try await sut.getRecipes(accessToken: "any invalid access token"))
+    }
+    
     func makeSUT(
         store: RecipeStore,
-        tokenVerifier: @escaping AuthTokenVerifier = { $0 },
+        tokenVerifier: @escaping AuthTokenVerifier = { _ in UUID() },
     ) -> RecipesApp {
         return RecipesApp(
             userStore: DummyUserStore(),

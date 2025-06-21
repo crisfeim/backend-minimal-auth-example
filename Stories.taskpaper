@@ -1,6 +1,8 @@
 Register sad path:
     - System delivers error on user store saving error @done
     - System delivers error on already existent user @done
+    - System delivers error on invalid email
+    - System delivers error on invalid password
 Register happy path:
     - System delivers valid token
 Login sad path:

@@ -17,7 +17,7 @@ Login happy path:
     - System delivers valid token @done
 Get recipes sad path:
     - System delivers error on invalid access token
-    - System delivers error on recipes store error
+    - System delivers error on recipes store error @done
 Get recipes happy path:
     - System delivers user recipes
 Post recipes sad path:

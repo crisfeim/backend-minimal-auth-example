@@ -71,6 +71,7 @@ class LoginUseCaseTests: XCTestCase {
     ) -> RecipesApp {
         return RecipesApp(
             userStore: store,
+            recipeStore: RecipeStoreDummy(),
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider,
@@ -89,6 +90,11 @@ class LoginUseCaseTests: XCTestCase {
 }
 
 private extension LoginUseCaseTests {
+    struct RecipeStoreDummy: RecipeStore {
+        func getRecipes() throws -> [Recipe] {
+            [ ]
+        }
+    }
     class UserStoreSpy: UserStore {
         private(set) var messages = [Message]()
         

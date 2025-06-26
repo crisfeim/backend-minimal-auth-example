@@ -21,7 +21,7 @@ class LoginUseCaseTests: XCTestCase {
         let store = UserStoreStub(findUserResult: .success(nil), saveResult: .success(()))
         let sut = makeSUT(store: store)
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is AppCoordinator.NotFoundUserError)
+            XCTAssertTrue(error is LoginController.NotFoundUserError)
         }
     }
     
@@ -29,7 +29,7 @@ class LoginUseCaseTests: XCTestCase {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
         let sut = makeSUT(store: store, emailValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is AppCoordinator.InvalidEmailError)
+            XCTAssertTrue(error is LoginController.InvalidEmailError)
         }
     }
     
@@ -37,7 +37,7 @@ class LoginUseCaseTests: XCTestCase {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
         let sut = makeSUT(store: store, passwordValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is AppCoordinator.InvalidPasswordError)
+            XCTAssertTrue(error is LoginController.InvalidPasswordError)
         }
     }
     
@@ -51,7 +51,7 @@ class LoginUseCaseTests: XCTestCase {
         let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
         let sut = makeSUT(store: store, passwordVerifier: { _, _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is AppCoordinator.IncorrectPasswordError)
+            XCTAssertTrue(error is LoginController.IncorrectPasswordError)
         }
     }
     

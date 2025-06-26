@@ -10,24 +10,17 @@ public typealias PasswordHasher = (_ input: String) async throws -> String
 public typealias PasswordVerifier = (_ password: String, _ hash: String) async throws -> Bool
 
 public class AppCoordinator: @unchecked Sendable {
-    private let userStore: UserStore
     private let recipeStore: RecipeStore
-    private let emailValidator: EmailValidator
-    private let passwordValidator: PasswordValidator
-    private let tokenProvider: AuthTokenProvider
     private let tokenVerifier: AuthTokenVerifier
-    private let passwordHasher: PasswordHasher
-    private let passwordVerifier: PasswordVerifier
+    
+    let registerController: RegisterController
+    let loginController: LoginController
     
     public init(userStore: UserStore, recipeStore: RecipeStore, emailValidator: @escaping EmailValidator, passwordValidator: @escaping PasswordValidator, tokenProvider: @escaping AuthTokenProvider, tokenVerifier: @escaping AuthTokenVerifier, passwordHasher: @escaping PasswordHasher, passwordVerifier: @escaping PasswordVerifier) {
-        self.userStore = userStore
         self.recipeStore = recipeStore
-        self.emailValidator = emailValidator
-        self.passwordValidator = passwordValidator
-        self.tokenProvider = tokenProvider
         self.tokenVerifier = tokenVerifier
-        self.passwordHasher = passwordHasher
-        self.passwordVerifier = passwordVerifier
+        registerController = RegisterController(userStore: userStore, emailValidator: emailValidator, passwordValidator: passwordValidator, tokenProvider: tokenProvider, passwordHasher: passwordHasher)
+        loginController = LoginController(userStore: userStore, emailValidator: emailValidator, passwordValidator: passwordValidator, tokenProvider: tokenProvider, passwordVerifier: passwordVerifier)
     }
     
     public struct UserAlreadyExists: Error {}
@@ -37,42 +30,13 @@ public class AppCoordinator: @unchecked Sendable {
     public struct IncorrectPasswordError: Error {}
     
     public func register(email: String, password: String) async throws -> [String: String] {
-        guard try userStore.findUser(byEmail: email) == nil else {
-            throw UserAlreadyExists()
-        }
-        
-        guard emailValidator(email) else {
-            throw InvalidEmailError()
-        }
-        
-        guard passwordValidator(password) else {
-            throw InvalidPasswordError()
-        }
-        
-        let hashedPassword = try await passwordHasher(password)
-        let userID = UUID()
-        try userStore.createUser(id: userID, email: email, hashedPassword: hashedPassword)
-        return ["token": try await tokenProvider(userID, email)]
+        let token = try await registerController.register(email: email, password: password)
+        return ["token": token]
     }
     
     public func login(email: String, password: String) async throws -> [String: String] {
-        guard emailValidator(email) else {
-            throw InvalidEmailError()
-        }
-        
-        guard passwordValidator(email) else {
-            throw InvalidPasswordError()
-        }
-        
-        guard let user = try userStore.findUser(byEmail: email) else {
-            throw NotFoundUserError()
-        }
-        
-        guard try await passwordVerifier(password, user.hashedPassword) else {
-            throw IncorrectPasswordError()
-        }
-        
-        return ["token": try await tokenProvider(user.id, email)]
+        let token = try await loginController.login(email: email, password: password)
+        return ["token": token]
     }
     
     public func getRecipes(accessToken: String) async throws -> [Recipe] {

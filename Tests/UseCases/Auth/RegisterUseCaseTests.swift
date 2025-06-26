@@ -26,7 +26,7 @@ class RegisterUseCaseTests: XCTestCase {
         )
         let sut = makeSUT(store: store)
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is AppCoordinator.UserAlreadyExists)
+            XCTAssertTrue(error is RegisterController.UserAlreadyExists)
         }
     }
     
@@ -38,7 +38,7 @@ class RegisterUseCaseTests: XCTestCase {
         let sut = makeSUT(store: store, emailValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
             
-            XCTAssertTrue(error is AppCoordinator.InvalidEmailError)
+            XCTAssertTrue(error is RegisterController.InvalidEmailError)
         }
     }
     
@@ -49,7 +49,7 @@ class RegisterUseCaseTests: XCTestCase {
         )
         let sut = makeSUT(store: store, passwordValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is AppCoordinator.InvalidPasswordError)
+            XCTAssertTrue(error is RegisterController.InvalidPasswordError)
         }
     }
     

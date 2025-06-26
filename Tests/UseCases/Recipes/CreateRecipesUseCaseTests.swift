@@ -3,18 +3,32 @@
 import XCTest
 import MinimalAuthExample
 
+struct RecipesController {
+    let store: RecipeStore
+    let tokenVerifier: AuthTokenVerifier
+    
+    func postRecipe(accessToken: String, title: String) async throws -> Recipe {
+        let userId = try await tokenVerifier(accessToken)
+        return try store.createRecipe(userId: userId, title: title)
+    }
+}
+
 class CreateRecipesUseCaseTests: XCTestCase {
     func test_postRecipe_deliversErrorOnStoreError() async throws {
         let store = RecipeStoreStub(result: .failure(anyError()))
         let sut = makeSUT(store: store)
-        await XCTAssertThrowsErrorAsync(try await sut.createRecipe(accessToken: "any valid access token", title: "Fried chicken"))
+        await XCTAssertThrowsErrorAsync(try await sut.postRecipe(accessToken: "any valid access token", title: "Fried chicken")) { error in
+            XCTAssertEqual(error as NSError, anyError())
+        }
     }
     
     func test_postRecipe_deliversErrorOnInvalidAccessToken() async throws {
         let store = RecipeStoreStub(result: .success(anyRecipe()))
         let sut = makeSUT(store: store, tokenVerifier: { _ in throw self.anyError() })
         
-        await XCTAssertThrowsErrorAsync(try await sut.createRecipe(accessToken: "any valid access token", title: "Fried chicken"))
+        await XCTAssertThrowsErrorAsync(try await sut.postRecipe(accessToken: "any valid access token", title: "Fried chicken")) { error in
+            XCTAssertEqual(error as NSError, anyError())
+        }
     }
     
     
@@ -23,7 +37,7 @@ class CreateRecipesUseCaseTests: XCTestCase {
         let store = RecipeStoreStub(result: .success(stubbedRecipe))
         let sut = makeSUT(store: store)
         
-        let recipe = try await sut.createRecipe(accessToken: "any valid access token", title: "Fried chicken")
+        let recipe = try await sut.postRecipe(accessToken: "any valid access token", title: "Fried chicken")
         
         XCTAssertEqual(recipe, stubbedRecipe)
     }
@@ -33,7 +47,7 @@ class CreateRecipesUseCaseTests: XCTestCase {
         let store = RecipeStoreSpy(result: .success(anyRecipe()))
         let sut = makeSUT(store: store, tokenVerifier: { _ in stubbedUserId })
         
-        let _ = try await sut.createRecipe(accessToken: "any valid access token", title: "Fried chicken")
+        let _ = try await sut.postRecipe(accessToken: "any valid access token", title: "Fried chicken")
         
         XCTAssertEqual(store.capturedMessages, [
             .init(userId: stubbedUserId, title: "Fried chicken")
@@ -43,16 +57,10 @@ class CreateRecipesUseCaseTests: XCTestCase {
     func makeSUT(
         store: RecipeStore,
         tokenVerifier: @escaping AuthTokenVerifier = { _ in UUID() },
-    ) -> AppCoordinator {
-        return AppCoordinator(
-            userStore: DummyUserStore(),
-            recipeStore: store,
-            emailValidator: { _ in true },
-            passwordValidator: { _ in true },
-            tokenProvider: { _,_ in "any" },
-            tokenVerifier: tokenVerifier,
-            passwordHasher: { $0 },
-            passwordVerifier: { _,_ in true }
+    ) -> RecipesController {
+        return RecipesController(
+            store: store,
+            tokenVerifier: tokenVerifier
         )
     }
     

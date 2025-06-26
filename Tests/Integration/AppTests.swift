@@ -24,26 +24,26 @@ final class AppTests: XCTestCase, @unchecked Sendable {
         )
         
         try await app.test(.router) { client in
-            try await assertPostRegisterSucceeds(client, request: RegisterRequest(email: "hi@crisfe.im", password: "123456"))
+            try await assertPostRegisterSucceeds(client, email: "hi@crisfe.im", password: "123456")
             
-            let token = try await assertPostLoginSucceeds(client, request: LoginRequest(email: "hi@crisfe.im", password: "123456"))
+            let token = try await assertPostLoginSucceeds(client, email: "hi@crisfe.im", password: "123456")
             
             let recipe = try await assertPostRecipeSucceeds(client, accessToken: token, request: CreateRecipeRequest(title: "Test recipe"))
             
             let recipes = try await assertGetRecipesSucceeds(client, accessToken: token)
             XCTAssertEqual(recipes, [recipe])
-            
         }
     }
 }
     
 private extension AppTests {
-    func assertPostRegisterSucceeds(_ client: TestClientProtocol, request: RegisterRequest, file: StaticString = #filePath, line: UInt = #line) async throws {
+    func assertPostRegisterSucceeds(_ client: TestClientProtocol, email: String, password: String, file: StaticString = #filePath, line: UInt = #line) async throws {
+        
         try await client.execute(
             uri: "/register",
             method: .post,
             headers: [.init("Content-Type")!: "application/json"],
-            body: try bufferFrom(request)
+            body: try bufferFrom(RegisterRequest(email: email, password: password))
         ) { response in
             let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: response.body)
             XCTAssertFalse(tokenResponse.token.isEmpty, file: file, line: line)
@@ -51,12 +51,12 @@ private extension AppTests {
         }
     }
     
-    func assertPostLoginSucceeds(_ client: TestClientProtocol, request: LoginRequest, file: StaticString = #filePath, line: UInt = #line) async throws -> String {
+    func assertPostLoginSucceeds(_ client: TestClientProtocol, email: String, password: String, file: StaticString = #filePath, line: UInt = #line) async throws -> String {
         try await client.execute(
             uri: "/login",
             method: .post,
             headers: [.init("Content-Type")!: "application/json"],
-            body: try bufferFrom(request)
+            body: try bufferFrom(LoginRequest(email: email, password: password))
         ) { response in
             let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: response.body)
             XCTAssertFalse(tokenResponse.token.isEmpty, file: file, line: line)

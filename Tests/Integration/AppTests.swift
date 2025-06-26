@@ -28,10 +28,13 @@ final class AppTests: XCTestCase, @unchecked Sendable {
             
             let token = try await assertPostLoginSucceeds(client, email: "hi@crisfe.im", password: "123456")
             
+            let recipesState0 = try await assertGetRecipesSucceeds(client, accessToken: token)
+            XCTAssertEqual(recipesState0, [])
+            
             let recipe = try await assertPostRecipeSucceeds(client, accessToken: token, request: CreateRecipeRequest(title: "Test recipe"))
             
-            let recipes = try await assertGetRecipesSucceeds(client, accessToken: token)
-            XCTAssertEqual(recipes, [recipe])
+            let recipesState1 = try await assertGetRecipesSucceeds(client, accessToken: token)
+            XCTAssertEqual(recipesState1, [recipe])
         }
     }
 }

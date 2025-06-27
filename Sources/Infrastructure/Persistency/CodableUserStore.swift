@@ -12,7 +12,7 @@ public class CodableUserStore: UserStore {
     }
     
     public func getUsers() throws -> [User] {
-        try store.get().map(UserMapper.map)
+        try store.get().map(CodableUserMapper.map)
     }
     
     @discardableResult
@@ -23,7 +23,7 @@ public class CodableUserStore: UserStore {
     }
     
     public func findUser(byEmail email: String) throws -> User? {
-        return try store.get().first { $0.email == email }.map(UserMapper.map)
+        return try store.get().first { $0.email == email }.map(CodableUserMapper.map)
     }
 }
 
@@ -34,7 +34,7 @@ private struct CodableUser: Codable {
     let hashedPassword: String
 }
 
-private enum UserMapper {
+private enum CodableUserMapper {
     static func map(_ user: CodableUser) -> User {
         User(id: user.id, email: user.email, hashedPassword: user.hashedPassword)
     }

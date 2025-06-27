@@ -2,6 +2,7 @@
 
 import XCTest
 import MinimalAuthExample
+import GenericAuth
 
 class CreateRecipesUseCaseTests: XCTestCase {
     func test_postRecipe_deliversErrorOnStoreError() async throws {

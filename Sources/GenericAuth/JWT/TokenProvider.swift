@@ -3,11 +3,16 @@
 import Foundation
 import JWTKit
 
-struct TokenProvider {
-    let kid: JWKIdentifier
-    let jwtKeyCollection: JWTKeyCollection
+public struct TokenProvider {
+    private let kid: JWKIdentifier
+    private let jwtKeyCollection: JWTKeyCollection
     
-    func execute(userId: UUID, email: String) async throws -> String {
+    public init(kid: JWKIdentifier, jwtKeyCollection: JWTKeyCollection) {
+        self.kid = kid
+        self.jwtKeyCollection = jwtKeyCollection
+    }
+    
+    public func execute(userId: UUID, email: String) async throws -> String {
         let payload = JWTPayloadData(
             subject: .init(value: userId.uuidString),
             expiration: .init(value: Date(timeIntervalSinceNow: 12 * 60 * 60)),

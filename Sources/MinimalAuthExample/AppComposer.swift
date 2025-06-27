@@ -3,6 +3,7 @@
 import Foundation
 import Hummingbird
 import JWTKit
+import GenericAuth
 
 public enum AppComposer {
     static public func execute(with configuration: ApplicationConfiguration, secretKey: HMACKey, userStore: UserStore, recipeStore: RecipeStore) async -> some ApplicationProtocol {

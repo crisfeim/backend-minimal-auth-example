@@ -20,8 +20,8 @@ final class AppTests: XCTestCase, @unchecked Sendable {
         let userStore = CodableUserStore(storeURL: userStoreURL)
         let recipeStore = CodableRecipeStore(storeURL: recipeStoreURL)
     
-        let app = await makeApp(
-            configuration: .init(),
+        let app = await AppComposer.execute(
+            with: .init(),
             userStore: userStore,
             recipeStore: recipeStore
         )

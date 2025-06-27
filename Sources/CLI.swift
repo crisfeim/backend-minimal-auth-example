@@ -18,8 +18,8 @@ struct CLI: AsyncParsableCommand {
         let userStore = CodableUserStore(storeURL: userStoreURL)
         let recipeStore = CodableRecipeStore(storeURL: recipeStoreURL)
         
-        let app = await makeApp(
-            configuration: .init(
+        let app = await AppComposer.execute(
+            with: .init(
                 address: .hostname(self.hostname, port: self.port),
                 serverName: "Hummingbird"
             ),

@@ -19,6 +19,13 @@ struct RecipesController {
         let userId = try await tokenVerifier(accessToken)
         return try store.createRecipe(userId: userId, title: title)
     }
+    
+    func getRecipes(accessToken: String) async throws -> [Recipe] {
+        let userId = try await tokenVerifier(accessToken)
+        let recipes = try store.getRecipes()
+
+        return recipes.filter { $0.userId == userId }
+    }
 }
 
 class CreateRecipesUseCaseTests: XCTestCase {

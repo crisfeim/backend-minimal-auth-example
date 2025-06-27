@@ -24,9 +24,7 @@ public enum AppComposer {
         
     
         let registerController = RegisterController<UUID>(
-            userMaker: { email, hashedPassword in
-                try userStore.createUser(email: email, hashedPassword: hashedPassword)
-            },
+            userMaker: userStore.createUser,
             userExists: { email in
                try userStore.findUser(byEmail: email) != nil
             },

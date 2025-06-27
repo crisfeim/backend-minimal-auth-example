@@ -38,5 +38,11 @@ public enum AppComposer {
 }
 
 
+infix operator .*: AdditionPrecedence
 
-
+/// Functional operator.
+private func .*<T>(lhs: T, rhs: (inout T) -> Void) -> T {
+    var copy = lhs
+    rhs(&copy)
+    return copy
+}

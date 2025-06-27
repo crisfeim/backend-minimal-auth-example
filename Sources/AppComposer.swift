@@ -40,7 +40,7 @@ public enum AppComposer {
             passwordVerifier: passwordVerifier.execute
         ) |> LoginControllerAdapter.init
         
-        let recipesController = RecipesControllerAdapter(RecipesController(store: recipeStore, tokenVerifier: tokenVerifier.execute))
+        let recipesController = RecipesController(store: recipeStore, tokenVerifier: tokenVerifier.execute) |> RecipesControllerAdapter.init
         
         return Application(router: Router() .* { router in
             router.post("/register", use: registerController.handle)

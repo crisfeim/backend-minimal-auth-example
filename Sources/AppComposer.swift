@@ -25,9 +25,7 @@ public enum AppComposer {
     
         let registerController = RegisterController<UUID>(
             userMaker: userStore.createUser,
-            userExists: { email in
-               try userStore.findUser(byEmail: email) != nil
-            },
+            userExists: userStore.findUser |>> isNotNil,
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider.execute,
@@ -35,7 +33,7 @@ public enum AppComposer {
         ) |> RegisterControllerAdapter.init
          
         let loginController = LoginController<UUID>(
-            userFinder: userStore.findUser << UserMapper.map,
+            userFinder: userStore.findUser |>> UserMapper.map,
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider.execute,
@@ -59,9 +57,9 @@ enum UserMapper {
     }
 }
 
+// MARK:  Functional operators
 infix operator .*: AdditionPrecedence
 
-/// Functional operator.
 private func .*<T>(lhs: T, rhs: (inout T) -> Void) -> T {
     var copy = lhs
     rhs(&copy)
@@ -81,10 +79,18 @@ func |><A, B>(lhs: A, rhs: (A) -> B) -> B {
 typealias Throwing<A, B> = (A) throws -> B
 typealias Mapper<A, B> = (A) -> B
 
-infix operator <<
-
-func <<<A, B, C>(lhs:  @escaping Throwing<A, B?>, rhs: @escaping Mapper<B, C>) -> Throwing<A, C?> {
+infix operator |>>
+private func |>><A, B, C>(lhs:  @escaping Throwing<A, B?>, rhs: @escaping Mapper<B, C>) -> Throwing<A, C?> {
     return { a in
         try lhs(a).map(rhs)
     }
 }
+
+private func |>><A, B, C>(lhs:  @escaping Throwing<A, B>, rhs: @escaping Mapper<B, C>) -> Throwing<A, C> {
+    return { a in
+        let b = try lhs(a)
+        return rhs(b)
+    }
+}
+
+private func isNotNil<T>(_ value: T?) -> Bool { value != nil }

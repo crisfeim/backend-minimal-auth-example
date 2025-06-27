@@ -38,53 +38,13 @@ public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, 
     
     let loginController = LoginControllerAdapter(LoginController(userStore: userStore, emailValidator: emailValidator, passwordValidator: passwordValidator, tokenProvider: tokenProvider.execute, passwordVerifier: passwordVerifier.execute))
     
-    let _ = RecipesController(store:  CodableRecipeStore(storeURL: recipeStoreURL), tokenVerifier: tokenVerifier.execute)
+    let recipesController = RecipesControllerAdapter(RecipesController(store:  CodableRecipeStore(storeURL: recipeStoreURL), tokenVerifier: tokenVerifier.execute))
     
-    let router = Router()
-    router.post("/register", use: registerController.handle)
-    router.post("/login", use: loginController.handle)
-    
-    router.post("/recipes") { request, context in
-        guard let authHeader = request.headers[values: .init("Authorization")!].first,
-              authHeader.starts(with: "Bearer "),
-              let token = authHeader.split(separator: " ").last.map(String.init)
-        else {
-            return Response(status: .unauthorized)
-        }
-        
-        let recipeRequest = try await request.decode(as: CreateRecipeRequest.self, context: context)
-        
-        let recipe = try await coordinator.createRecipe(
-            accessToken: token,
-            title: recipeRequest.title
-        )
-        
-        return try ResponseGeneratorEncoder.execute(recipe, from: request, context: context)
-    }
-    
-    router.get("/recipes") {
-        request,
-        context in
-        guard let authHeader = request.headers[values: .init("Authorization")!].first,
-              authHeader.starts(with: "Bearer "),
-              let token = authHeader.split(separator: " ").last.map(String.init)
-        else {
-            return Response(status: .unauthorized)
-        }
-        
-        return try await ResponseGeneratorEncoder.execute(
-            try coordinator.getRecipes(accessToken: token),
-            from: request,
-            context: context
-        )
-        
-    }
-
-    let app = Application(
-        router: router,
-        configuration: configuration
-    )
-    return app
+    return Application(router: Router() .* { router in
+        router.post("/register", use: registerController.handle)
+        router.post("/login", use: loginController.handle)
+        router.addRoutes(recipesController.endpoints, atPath: "/recipes")
+    }, configuration: configuration )
 }
 
 
@@ -107,6 +67,14 @@ struct RegisterControllerAdapter: @unchecked Sendable {
     }
 }
 
+infix operator .*: AdditionPrecedence
+
+func .*<T>(lhs: T, rhs: (inout T) -> Void) -> T {
+    var copy = lhs
+    rhs(&copy)
+    return copy
+}
+
 struct LoginControllerAdapter: @unchecked Sendable   {
     let controller: LoginController
     
@@ -125,5 +93,45 @@ struct LoginControllerAdapter: @unchecked Sendable   {
             from: request,
             context: context
         )
+    }
+}
+
+import Hummingbird
+
+struct RecipesControllerAdapter: @unchecked Sendable {
+    let controller: RecipesController
+    
+    init(_ controller: RecipesController) {
+        self.controller = controller
+    }
+    
+    var endpoints: RouteCollection<BasicRequestContext> {
+        return RouteCollection(context: BasicRequestContext.self)
+            .get(use: get)
+            .post(use: post)
+    }
+    
+    func post(request: Request, context: BasicRequestContext) async throws -> Response {
+        guard let authHeader = request.headers[values: .init("Authorization")!].first,
+              authHeader.starts(with: "Bearer "),
+              let token = authHeader.split(separator: " ").last.map(String.init)
+        else {
+            return Response(status: .unauthorized)
+        }
+        
+        let recipeRequest = try await request.decode(as: CreateRecipeRequest.self, context: context)
+        let recipe = try await controller.postRecipe(accessToken: token, title: recipeRequest.title)
+        return try ResponseGeneratorEncoder.execute(recipe, from: request, context: context)
+    }
+    
+    func get(request: Request, context: BasicRequestContext) async throws -> Response {
+        guard let authHeader = request.headers[values: .init("Authorization")!].first,
+              authHeader.starts(with: "Bearer "),
+              let token = authHeader.split(separator: " ").last.map(String.init)
+        else {
+            return Response(status: .unauthorized)
+        }
+        let recipes = try await controller.getRecipes(accessToken: token)
+        return try ResponseGeneratorEncoder.execute(recipes, from: request, context: context)
     }
 }

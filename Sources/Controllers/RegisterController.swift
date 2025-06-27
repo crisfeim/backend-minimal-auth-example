@@ -2,7 +2,7 @@
 
 import Foundation
 
-public struct RegisterController {
+public struct RegisterController<User> {
     private let userStore: UserStore
     private let emailValidator: EmailValidator
     private let passwordValidator: PasswordValidator

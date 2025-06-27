@@ -29,7 +29,7 @@ class RegisterControllerTests: XCTestCase {
         )
         let sut = makeSUT(store: store)
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RegisterController.UserAlreadyExists)
+            XCTAssertTrue(error is RegisterController<User>.UserAlreadyExists)
         }
     }
     
@@ -41,7 +41,7 @@ class RegisterControllerTests: XCTestCase {
         let sut = makeSUT(store: store, emailValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
             
-            XCTAssertTrue(error is RegisterController.InvalidEmailError)
+            XCTAssertTrue(error is RegisterController<User>.InvalidEmailError)
         }
     }
     
@@ -52,7 +52,7 @@ class RegisterControllerTests: XCTestCase {
         )
         let sut = makeSUT(store: store, passwordValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RegisterController.InvalidPasswordError)
+            XCTAssertTrue(error is RegisterController<User>.InvalidPasswordError)
         }
     }
     
@@ -83,7 +83,7 @@ class RegisterControllerTests: XCTestCase {
         passwordValidator: @escaping PasswordValidator = { _ in true },
         tokenProvider: @escaping AuthTokenProvider = { _,_ in "any" },
         hasher: @escaping PasswordHasher = { $0 }
-    ) -> RegisterController {
+    ) -> RegisterController<User> {
         return RegisterController(
             userStore: store,
             emailValidator: emailValidator,

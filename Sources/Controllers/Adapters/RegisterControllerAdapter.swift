@@ -3,9 +3,9 @@
 import Hummingbird
 
 struct RegisterControllerAdapter: @unchecked Sendable {
-    let controller: RegisterController
+    let controller: RegisterController<User>
     
-    init(_ controller: RegisterController) {
+    init(_ controller: RegisterController<User>) {
         self.controller = controller
     }
     

@@ -2,9 +2,6 @@
 
 import Foundation
 
-
-
-
 public class CodableUserStore: UserStore {
     private let store: CodableStore<CodableUser>
     public init(storeURL: URL) {

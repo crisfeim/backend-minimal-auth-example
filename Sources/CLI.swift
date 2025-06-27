@@ -2,6 +2,7 @@
 
 import ArgumentParser
 import Foundation
+import Hummingbird
 
 @main
 struct CLI: AsyncParsableCommand {
@@ -18,16 +19,14 @@ struct CLI: AsyncParsableCommand {
         let userStore = CodableUserStore(storeURL: userStoreURL)
         let recipeStore = CodableRecipeStore(storeURL: recipeStoreURL)
         
-        let app = await AppComposer.execute(
-            with: .init(
-                address: .hostname(self.hostname, port: self.port),
-                serverName: "Hummingbird"
-            ),
+        let config = ApplicationConfiguration(address: .hostname(self.hostname, port: self.port), serverName: "Hummingbird")
+        
+       return try await AppComposer.execute(
+            with: config,
             secretKey: "my secret key that should come from deployment environment",
             userStore: userStore,
             recipeStore: recipeStore
-        )
-        try await app.runService()
+       ).runService()
     }
     
     private func cachesDirectory() -> URL {

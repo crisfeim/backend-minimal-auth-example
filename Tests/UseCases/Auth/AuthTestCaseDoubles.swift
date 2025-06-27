@@ -4,16 +4,6 @@
 import XCTest
 import MinimalAuthExample
 
-struct RecipeStoreDummy: RecipeStore {
-    func getRecipes() throws -> [Recipe] {
-        [ ]
-    }
-    
-    func createRecipe(userId: UUID, title: String) throws -> Recipe {
-        Recipe(id: UUID(), userId: userId, title: title)
-    }
-}
-
 class UserStoreSpy: UserStore {
     private(set) var messages = [Message]()
     

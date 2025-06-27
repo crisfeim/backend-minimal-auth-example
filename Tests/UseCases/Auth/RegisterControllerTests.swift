@@ -13,7 +13,7 @@ class RegisterControllerTests: XCTestCase {
     func test_register_deliversErrorOnAlreadyExistingUser() async throws {
         let sut = makeSUT(userMaker: { _,_ in self.anyUser().id }, userExists: { _ in true })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RegisterController<UUID>.UserAlreadyExists)
+            XCTAssertTrue(error is UserAlreadyExists)
         }
     }
     
@@ -21,14 +21,14 @@ class RegisterControllerTests: XCTestCase {
         let sut = makeSUT(userMaker: { _,_ in self.anyUser().id }, userExists: { _ in false }, emailValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
             
-            XCTAssertTrue(error is RegisterController<UUID>.InvalidEmailError)
+            XCTAssertTrue(error is InvalidEmailError)
         }
     }
     
     func test_register_deliversErrorOnInvalidPassword() async throws {
         let sut = makeSUT(userMaker: { _,_ in self.anyUser().id }, userExists: { _ in false }, passwordValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RegisterController<UUID>.InvalidPasswordError)
+            XCTAssertTrue(error is InvalidPasswordError)
         }
     }
     

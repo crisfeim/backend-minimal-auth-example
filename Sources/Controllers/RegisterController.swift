@@ -6,6 +6,8 @@ import Foundation
 public typealias UserMaker<UserId> = (_ email: String, _ hashedPassword: String) throws -> UserId
 public typealias UserExists = (_ email: String) throws -> Bool
 
+public struct UserAlreadyExists: Error {}
+
 public struct RegisterController<UserId> {
     private let userMaker: UserMaker<UserId>
     private let userExists: UserExists
@@ -29,10 +31,6 @@ public struct RegisterController<UserId> {
         self.tokenProvider = tokenProvider
         self.passwordHasher = passwordHasher
     }
-    
-    public struct UserAlreadyExists: Error {}
-    public struct InvalidEmailError: Error {}
-    public struct InvalidPasswordError: Error {}
     
     public func register(email: String, password: String) async throws -> String {
         guard try !userExists(email) else {

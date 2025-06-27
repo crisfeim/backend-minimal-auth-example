@@ -3,89 +3,58 @@
 import XCTest
 import MinimalAuthExample
 
-
-
 class RegisterControllerTests: XCTestCase {
-    
-    func test_init_doesntMessagesStoreUponCreation() throws {
-        let store = UserStoreSpy()
-        let _ = makeSUT(store: store)
-        XCTAssertEqual(store.messages, [])
-    }
-    
+
     func test_register_deliversErrorOnStoreSaveError() async throws {
-        let store = UserStoreStub(
-            findUserResult: .success(anyUser()),
-            saveResult: .failure(anyError())
-        )
-        let sut = makeSUT(store: store)
+        let sut = makeSUT(userMaker: { _,_ in throw self.anyError() }, userExists: { _ in true })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password"))
     }
     
     func test_register_deliversErrorOnAlreadyExistingUser() async throws {
-        let store = UserStoreStub(
-            findUserResult: .success(anyUser()),
-            saveResult: .success(())
-        )
-        let sut = makeSUT(store: store)
+        let sut = makeSUT(userMaker: { _,_ in self.anyUser().id }, userExists: { _ in true })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RegisterController<User>.UserAlreadyExists)
+            XCTAssertTrue(error is RegisterController<UUID>.UserAlreadyExists)
         }
     }
     
     func test_register_deliversErrorOnInvalidEmail() async throws {
-        let store = UserStoreStub(
-            findUserResult: .success(nil),
-            saveResult: .success(())
-        )
-        let sut = makeSUT(store: store, emailValidator: { _ in false })
+        let sut = makeSUT(userMaker: { _,_ in self.anyUser().id }, userExists: { _ in false }, emailValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
             
-            XCTAssertTrue(error is RegisterController<User>.InvalidEmailError)
+            XCTAssertTrue(error is RegisterController<UUID>.InvalidEmailError)
         }
     }
     
     func test_register_deliversErrorOnInvalidPassword() async throws {
-        let store = UserStoreStub(
-            findUserResult: .success(nil),
-            saveResult: .success(())
-        )
-        let sut = makeSUT(store: store, passwordValidator: { _ in false })
+        let sut = makeSUT(userMaker: { _,_ in self.anyUser().id }, userExists: { _ in false }, passwordValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is RegisterController<User>.InvalidPasswordError)
+            XCTAssertTrue(error is RegisterController<UUID>.InvalidPasswordError)
         }
     }
     
     func test_register_deliversProvidedTokenOnNewUserValidCredentialsAndUserStoreSuccess() async throws {
-        let store = UserStoreStub(
-            findUserResult: .success(nil),
-            saveResult: .success(())
-        )
-        
-        let sut = makeSUT(store: store, tokenProvider: { _,_ in "any-provided-token" })
+        let sut = makeSUT(userMaker: { _,_ in self.anyUser().id }, userExists: { _ in false }, tokenProvider: { _,_ in "any-provided-token" })
         let token = try await sut.register(email: "any-email", password: "any-password")
         XCTAssertEqual(token, "any-provided-token")
     }
     
     func test_register_deliversErrorOnHasherError() async throws {
-        let store = UserStoreStub(
-            findUserResult: .success(nil),
-            saveResult: .success(())
-        )
-        let sut = makeSUT(store: store, hasher: { _ in throw self.anyError() })
+        let sut = makeSUT(userMaker: { _,_ in self.anyUser().id }, userExists: { _ in true }, hasher: { _ in throw self.anyError() })
         await XCTAssertThrowsErrorAsync(try await sut.register(email: "any-email", password: "any-password"))
     }
     
     
     func makeSUT(
-        store: UserStore,
+        userMaker: @escaping UserMaker<UUID>,
+        userExists: @escaping UserExists,
         emailValidator: @escaping EmailValidator = { _ in true },
         passwordValidator: @escaping PasswordValidator = { _ in true },
-        tokenProvider: @escaping AuthTokenProvider = { _,_ in "any" },
+        tokenProvider: @escaping AuthTokenProvider<UUID> = { _,_ in "any" },
         hasher: @escaping PasswordHasher = { $0 }
-    ) -> RegisterController<User> {
-        return RegisterController(
-            userStore: store,
+    ) -> RegisterController<UUID> {
+        return RegisterController<UUID>(
+            userMaker: userMaker,
+            userExists: userExists,
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider,

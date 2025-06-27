@@ -21,17 +21,19 @@ class CodableUserStoreTests: XCTestCase {
     func test_saveUser_savesUser() throws {
         let sut = CodableUserStore(storeURL: testSpecificURL())
         let user = anyUser()
-        try sut.createUser(id: user.id, email: user.email, hashedPassword: user.hashedPassword)
+        try sut.createUser(email: user.email, hashedPassword: user.hashedPassword)
         let users = try sut.getUsers()
-        XCTAssertEqual(users, [user])
+        XCTAssertEqual(users.count, 1)
+        XCTAssertEqual(users.first?.email, user.email)
+        XCTAssertEqual(users.first?.hashedPassword, user.hashedPassword)
     }
     
     func test_findUserByEmail_returnsUserIfExists() throws {
         let sut = CodableUserStore(storeURL: testSpecificURL())
-        let user = User(id: UUID(), email: "hi@crisfe.im", hashedPassword: "hashedPassword")
-        try sut.createUser(id: user.id, email: user.email, hashedPassword: user.hashedPassword)
+        try sut.createUser(email: "hi@crisfe.im", hashedPassword: "any password")
         let foundUser = try sut.findUser(byEmail: "hi@crisfe.im")
-        XCTAssertEqual(foundUser, user)
+        XCTAssertEqual(foundUser?.email, "hi@crisfe.im")
+        XCTAssertEqual(foundUser?.hashedPassword, "any password")
     }
     
     private func cachesDirectory() -> URL {

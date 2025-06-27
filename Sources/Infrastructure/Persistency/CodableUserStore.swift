@@ -15,8 +15,11 @@ public class CodableUserStore: UserStore {
         try store.get().map(UserMapper.map)
     }
     
-    public func createUser(id: UUID, email: String, hashedPassword: String) throws {
+    @discardableResult
+    public func createUser(email: String, hashedPassword: String) throws -> UUID {
+        let id = UUID()
         try store.save(CodableUser(id: id, email: email, hashedPassword: hashedPassword))
+        return id
     }
     
     public func findUser(byEmail email: String) throws -> User? {

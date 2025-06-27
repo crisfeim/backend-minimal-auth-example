@@ -5,78 +5,68 @@ import MinimalAuthExample
 
 class LoginControllerTests: XCTestCase {
     
-    
-    
-    func test_init_doesntMessagesStoreUponCreation() throws {
-        let store = UserStoreSpy()
-        let _ = makeSUT(store: store)
-        XCTAssertEqual(store.messages, [])
-    }
-    
-    func test_login_deliversErrorOnStoreError() async throws {
-        let store = UserStoreStub(findUserResult: .failure(anyError()), saveResult: .success(()))
-        let sut = makeSUT(store: store)
+    func test_login_deliversErrorOnUserFinder() async throws {
+        let sut = makeSUT(userFinder: { _ in throw self.anyError() })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password"))
     }
     
     func test_login_deliversErrorOnNotFoundUser() async throws {
-        let store = UserStoreStub(findUserResult: .success(nil), saveResult: .success(()))
-        let sut = makeSUT(store: store)
+        let sut = makeSUT(userFinder: { _ in return nil })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is LoginController.NotFoundUserError)
+            XCTAssertTrue(error is NotFoundUserError)
         }
     }
     
     func test_login_deliversErrorOnInvalidEmail() async throws {
-        let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
-        let sut = makeSUT(store: store, emailValidator: { _ in false })
+        let sut = makeSUT(userFinder: { _ in self.anyUser() }, emailValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is LoginController.InvalidEmailError)
+            XCTAssertTrue(error is InvalidEmailError)
         }
     }
     
     func test_login_deliversErrorOnInvalidPassword() async throws {
-        let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
-        let sut = makeSUT(store: store, passwordValidator: { _ in false })
+        let sut = makeSUT(userFinder: { _ in self.anyUser() }, passwordValidator: { _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is LoginController.InvalidPasswordError)
+            XCTAssertTrue(error is InvalidPasswordError)
         }
     }
     
     func test_login_deliversErrorOnPasswordVerifierError() async throws {
-        let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
-        let sut = makeSUT(store: store, passwordVerifier: { _, _ in throw self.anyError() })
+        let sut = makeSUT(userFinder: { _ in self.anyUser() }, passwordVerifier: { _, _ in throw self.anyError() })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password"))
     }
     
     func test_login_deliversErrorOnIncorrectPassword() async throws {
-        let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
-        let sut = makeSUT(store: store, passwordVerifier: { _, _ in false })
+        let sut = makeSUT(userFinder: { _ in self.anyUser() }, passwordVerifier: { _, _ in false })
         await XCTAssertThrowsErrorAsync(try await sut.login(email: "any-email", password: "any-password")) { error in
-            XCTAssertTrue(error is LoginController.IncorrectPasswordError)
+            XCTAssertTrue(error is IncorrectPasswordError)
         }
     }
     
     func test_login_deliversProvidedTokenOnCorrectCredentialsAndFoundUser() async throws {
-        let store = UserStoreStub(findUserResult: .success(anyUser()), saveResult: .success(()))
-        let sut = makeSUT(store: store, tokenProvider: { _,_ in "any-provided-token" })
+        let sut = makeSUT(userFinder: { _ in self.anyUser() }, tokenProvider: { _,_ in "any-provided-token" })
         let token = try await sut.login(email: "any-email", password: "any-password")
         XCTAssertEqual(token, "any-provided-token")
     }
     
     func makeSUT(
-        store: UserStore,
+        userFinder: @escaping LoginController<UUID>.UserFinder = { _ in nil },
         emailValidator: @escaping EmailValidator = { _ in true },
         passwordValidator: @escaping PasswordValidator = { _ in true },
-        tokenProvider: @escaping AuthTokenProvider = { _,_ in "any-token" },
+        tokenProvider: @escaping AuthTokenProvider<UUID> = { _,_ in "any-token" },
         passwordVerifier: @escaping PasswordVerifier = { _,_ in true }
-    ) -> LoginController {
-        return LoginController(
-            userStore: store,
+    ) -> LoginController<UUID> {
+        return LoginController<UUID>(
+            userFinder: userFinder,
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider,
             passwordVerifier: passwordVerifier
         )
+    }
+    
+    
+    func anyUser() -> LoginController<UUID>.User {
+        .init(id: UUID(), hashedPassword: "any hashed password")
     }
 }

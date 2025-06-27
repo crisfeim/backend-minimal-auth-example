@@ -1,12 +1,12 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 27/6/25.
 
-
+import Foundation
 import Hummingbird
 
 struct LoginControllerAdapter: @unchecked Sendable   {
-    let controller: LoginController
+    let controller: LoginController<UUID>
     
-    init(_ controller: LoginController) {
+    init(_ controller: LoginController<UUID>) {
         self.controller = controller
     }
     

@@ -2,21 +2,28 @@
 
 import Foundation
 
-public struct RegisterController<User> {
-    private let userStore: UserStore
+
+public typealias UserMaker<UserId> = (_ email: String, _ hashedPassword: String) throws -> UserId
+public typealias UserExists = (_ email: String) throws -> Bool
+
+public struct RegisterController<UserId> {
+    private let userMaker: UserMaker<UserId>
+    private let userExists: UserExists
     private let emailValidator: EmailValidator
     private let passwordValidator: PasswordValidator
-    private let tokenProvider: AuthTokenProvider
+    private let tokenProvider: AuthTokenProvider<UserId>
     private let passwordHasher: PasswordHasher
     
     public init(
-        userStore: UserStore,
+        userMaker: @escaping UserMaker<UserId>,
+        userExists: @escaping UserExists,
         emailValidator: @escaping EmailValidator,
         passwordValidator: @escaping PasswordValidator,
-        tokenProvider: @escaping AuthTokenProvider,
+        tokenProvider: @escaping AuthTokenProvider<UserId>,
         passwordHasher: @escaping PasswordHasher
     ) {
-        self.userStore = userStore
+        self.userMaker = userMaker
+        self.userExists = userExists
         self.emailValidator = emailValidator
         self.passwordValidator = passwordValidator
         self.tokenProvider = tokenProvider
@@ -28,7 +35,7 @@ public struct RegisterController<User> {
     public struct InvalidPasswordError: Error {}
     
     public func register(email: String, password: String) async throws -> String {
-        guard try userStore.findUser(byEmail: email) == nil else {
+        guard try !userExists(email) else {
             throw UserAlreadyExists()
         }
         
@@ -41,8 +48,7 @@ public struct RegisterController<User> {
         }
         
         let hashedPassword = try await passwordHasher(password)
-        let userID = UUID()
-        try userStore.createUser(id: userID, email: email, hashedPassword: hashedPassword)
+        let userID = try userMaker(email, hashedPassword)
         return try await tokenProvider(userID, email)
     }
 }

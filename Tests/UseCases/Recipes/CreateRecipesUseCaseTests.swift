@@ -4,8 +4,16 @@ import XCTest
 import MinimalAuthExample
 
 struct RecipesController {
-    let store: RecipeStore
-    let tokenVerifier: AuthTokenVerifier
+    private let store: RecipeStore
+    private let tokenVerifier: AuthTokenVerifier
+    
+    struct UnauthorizedError: Error {}
+    private let jsonDecoder = JSONDecoder()
+    
+    public init(store: RecipeStore, tokenVerifier: @escaping AuthTokenVerifier) {
+        self.store = store
+        self.tokenVerifier = tokenVerifier
+    }
     
     func postRecipe(accessToken: String, title: String) async throws -> Recipe {
         let userId = try await tokenVerifier(accessToken)
@@ -30,7 +38,6 @@ class CreateRecipesUseCaseTests: XCTestCase {
             XCTAssertEqual(error as NSError, anyError())
         }
     }
-    
     
     func test_postRecipe_deliversRecipeOnSuccess() async throws {
         let stubbedRecipe = anyRecipe()
@@ -58,10 +65,7 @@ class CreateRecipesUseCaseTests: XCTestCase {
         store: RecipeStore,
         tokenVerifier: @escaping AuthTokenVerifier = { _ in UUID() },
     ) -> RecipesController {
-        return RecipesController(
-            store: store,
-            tokenVerifier: tokenVerifier
-        )
+        RecipesController(store: store, tokenVerifier: tokenVerifier)
     }
     
     struct RecipeStoreStub: RecipeStore {

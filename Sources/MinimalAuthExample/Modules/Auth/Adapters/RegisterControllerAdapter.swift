@@ -12,7 +12,7 @@ struct RegisterControllerAdapter: @unchecked Sendable {
     }
     
     func handle(request: Request, context: BasicRequestContext) async throws  -> Response {
-        let registerRequest = try await request.decode(as: RegisterRequest.self, context: context)
+        let registerRequest = try await request.decode(as: AuthRequest.self, context: context)
         let token = try await controller.register(email: registerRequest.email, password: registerRequest.password)
         
         return try ResponseGeneratorEncoder.execute(

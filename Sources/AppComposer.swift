@@ -37,11 +37,7 @@ public enum AppComposer {
         ) |> RegisterControllerAdapter.init
          
         let loginController = LoginController<UUID>(
-            userFinder: { email in
-                return try userStore.findUser(byEmail: email).map {
-                    .init(id: $0.id, hashedPassword: $0.hashedPassword)
-                }
-            },
+            userFinder: userStore.findUser << UserMapper.map,
             emailValidator: emailValidator,
             passwordValidator: passwordValidator,
             tokenProvider: tokenProvider.execute,
@@ -58,6 +54,12 @@ public enum AppComposer {
     }
 }
 
+
+enum UserMapper {
+    static func map(_ user: User) -> LoginController<UUID>.User {
+        .init(id: user.id, hashedPassword: user.hashedPassword)
+    }
+}
 
 infix operator .*: AdditionPrecedence
 
@@ -76,4 +78,15 @@ precedencegroup PipePrecedence {
 infix operator |> : PipePrecedence
 func |><A, B>(lhs: A, rhs: (A) -> B) -> B {
     rhs(lhs)
+}
+
+typealias Throwing<A, B> = (A) throws -> B
+typealias Mapper<A, B> = (A) -> B
+
+infix operator <<
+
+func <<<A, B, C>(lhs:  @escaping Throwing<A, B?>, rhs: @escaping Mapper<B, C>) -> Throwing<A, C?> {
+    return { a in
+        try lhs(a).map(rhs)
+    }
 }

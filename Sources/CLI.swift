@@ -23,6 +23,7 @@ struct CLI: AsyncParsableCommand {
                 address: .hostname(self.hostname, port: self.port),
                 serverName: "Hummingbird"
             ),
+            secretKey: "my secret key that should come from deployment environment",
             userStore: userStore,
             recipeStore: recipeStore
         )

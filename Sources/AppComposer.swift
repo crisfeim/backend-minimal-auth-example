@@ -5,11 +5,11 @@ import Hummingbird
 import JWTKit
 
 public enum AppComposer {
-    static public func execute(with configuration: ApplicationConfiguration, userStore: UserStore, recipeStore: RecipeStore) async -> some ApplicationProtocol {
+    static public func execute(with configuration: ApplicationConfiguration, secretKey: HMACKey, userStore: UserStore, recipeStore: RecipeStore) async -> some ApplicationProtocol {
         
         let jwtKeyCollection = JWTKeyCollection()
         await jwtKeyCollection.add(
-            hmac: "my-secret-key",
+            hmac: secretKey,
             digestAlgorithm: .sha256,
             kid: JWKIdentifier("auth-jwt")
         )

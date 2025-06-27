@@ -22,6 +22,7 @@ final class AppTests: XCTestCase, @unchecked Sendable {
     
         let app = await AppComposer.execute(
             with: .init(),
+            secretKey: "my secret key that should come from deployment environment",
             userStore: userStore,
             recipeStore: recipeStore
         )

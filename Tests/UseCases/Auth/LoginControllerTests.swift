@@ -49,6 +49,17 @@ class LoginControllerTests: XCTestCase {
         XCTAssertEqual(token, "any-provided-token")
     }
     
+    func test_login_passesPasswordToPasswordValidator() async throws {
+        var password: String?
+        let sut = makeSUT(passwordValidator: {
+            password = $0
+            return true
+        })
+        
+        _ = try? await sut.login(email: "any email", password: "any password")
+        XCTAssertEqual(password, "any password")
+    }
+    
     func makeSUT(
         userFinder: @escaping LoginController<UUID>.UserFinder = { _ in nil },
         emailValidator: @escaping EmailValidator = { _ in true },

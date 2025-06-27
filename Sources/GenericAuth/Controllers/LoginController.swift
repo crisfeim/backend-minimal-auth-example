@@ -38,7 +38,7 @@ public struct LoginController<UserId> {
             throw InvalidEmailError()
         }
         
-        guard passwordValidator(email) else {
+        guard passwordValidator(password) else {
             throw InvalidPasswordError()
         }
         

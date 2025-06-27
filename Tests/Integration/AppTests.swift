@@ -51,7 +51,7 @@ private extension AppTests {
             uri: "/register",
             method: .post,
             headers: [.init("Content-Type")!: "application/json"],
-            body: try bufferFrom(RegisterRequest(email: email, password: password))
+            body: try bufferFrom(AuthRequest(email: email, password: password))
         ) { response in
             let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: response.body)
             XCTAssertFalse(tokenResponse.token.isEmpty, file: file, line: line)
@@ -64,7 +64,7 @@ private extension AppTests {
             uri: "/login",
             method: .post,
             headers: [.init("Content-Type")!: "application/json"],
-            body: try bufferFrom(LoginRequest(email: email, password: password))
+            body: try bufferFrom(AuthRequest(email: email, password: password))
         ) { response in
             let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: response.body)
             XCTAssertFalse(tokenResponse.token.isEmpty, file: file, line: line)

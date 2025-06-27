@@ -12,7 +12,7 @@ struct LoginControllerAdapter: @unchecked Sendable   {
     }
     
     func handle(request: Request, context: BasicRequestContext) async throws  -> Response {
-        let registerRequest = try await request.decode(as: LoginRequest.self, context: context)
+        let registerRequest = try await request.decode(as: AuthRequest.self, context: context)
         let token = try await controller.login(
             email: registerRequest.email,
             password: registerRequest.password

@@ -1,6 +1,7 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 21/6/25.
 
-public struct RegisterRequest: Codable {
+
+public struct AuthRequest: Codable {
     public let email: String
     public let password: String
     

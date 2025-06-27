@@ -17,10 +17,13 @@ final class AppTests: XCTestCase, @unchecked Sendable {
         let userStoreURL = testSpecificURL().appendingPathComponent("users.json")
         let recipeStoreURL = testSpecificURL().appendingPathComponent("recipes.json")
         
+        let userStore = CodableUserStore(storeURL: userStoreURL)
+        let recipeStore = CodableRecipeStore(storeURL: recipeStoreURL)
+    
         let app = await makeApp(
             configuration: .init(),
-            userStoreURL: userStoreURL,
-            recipeStoreURL: recipeStoreURL
+            userStore: userStore,
+            recipeStore: recipeStore
         )
         
         try await app.test(.router) { client in

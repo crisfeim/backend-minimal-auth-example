@@ -14,13 +14,17 @@ struct CLI: AsyncParsableCommand {
     func run() async throws {
         let userStoreURL = appDataURL().appendingPathComponent("users.json")
         let recipeStoreURL = appDataURL().appendingPathComponent("recipes.json")
+        
+        let userStore = CodableUserStore(storeURL: userStoreURL)
+        let recipeStore = CodableRecipeStore(storeURL: recipeStoreURL)
+        
         let app = await makeApp(
             configuration: .init(
                 address: .hostname(self.hostname, port: self.port),
                 serverName: "Hummingbird"
             ),
-            userStoreURL: userStoreURL,
-            recipeStoreURL: recipeStoreURL
+            userStore: userStore,
+            recipeStore: recipeStore
         )
         try await app.runService()
     }

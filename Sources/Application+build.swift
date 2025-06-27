@@ -4,7 +4,7 @@ import Foundation
 import Hummingbird
 import JWTKit
 
-public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, recipeStoreURL: URL) async -> some ApplicationProtocol {
+public func makeApp(configuration: ApplicationConfiguration, userStore: UserStore, recipeStore: RecipeStore) async -> some ApplicationProtocol {
     
     let jwtKeyCollection = JWTKeyCollection()
     await jwtKeyCollection.add(
@@ -21,13 +21,12 @@ public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, 
     let emailValidator: EmailValidator = { _ in true }
     let passwordValidator: PasswordValidator = { _ in true }
     
-    let userStore = CodableUserStore(storeURL: userStoreURL)
     
     let registerController = RegisterControllerAdapter(RegisterController(userStore: userStore, emailValidator: emailValidator, passwordValidator: passwordValidator, tokenProvider: tokenProvider.execute, passwordHasher: passwordHasher.execute))
     
     let loginController = LoginControllerAdapter(LoginController(userStore: userStore, emailValidator: emailValidator, passwordValidator: passwordValidator, tokenProvider: tokenProvider.execute, passwordVerifier: passwordVerifier.execute))
     
-    let recipesController = RecipesControllerAdapter(RecipesController(store:  CodableRecipeStore(storeURL: recipeStoreURL), tokenVerifier: tokenVerifier.execute))
+    let recipesController = RecipesControllerAdapter(RecipesController(store: recipeStore, tokenVerifier: tokenVerifier.execute))
     
     return Application(router: Router() .* { router in
         router.post("/register", use: registerController.handle)

@@ -2,11 +2,8 @@
 
 import Foundation
 
-
 public typealias UserMaker<UserId> = (_ email: String, _ hashedPassword: String) throws -> UserId
 public typealias UserExists = (_ email: String) throws -> Bool
-
-public struct UserAlreadyExists: Error {}
 
 public struct RegisterController<UserId> {
     private let userMaker: UserMaker<UserId>

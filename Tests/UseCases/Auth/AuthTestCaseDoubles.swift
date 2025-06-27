@@ -9,11 +9,12 @@ class UserStoreSpy: UserStore {
     
     enum Message: Equatable {
         case findUser(byEmail: String)
-        case saveUser(id: UUID, email: String, hashedPassword: String)
+        case saveUser(email: String, hashedPassword: String)
     }
     
-    func createUser(id: UUID, email: String, hashedPassword: String) throws {
-        messages.append(.saveUser(id: id, email: email, hashedPassword: hashedPassword))
+    func createUser(email: String, hashedPassword: String) throws -> UUID {
+        messages.append(.saveUser(email: email, hashedPassword: hashedPassword))
+        return UUID()
     }
     
     func findUser(byEmail email: String) throws -> User? {
@@ -29,7 +30,8 @@ struct UserStoreStub: UserStore {
         try findUserResult.get()
     }
     
-    func createUser(id: UUID, email: String, hashedPassword: String) throws {
+    func createUser(email: String, hashedPassword: String) throws -> UUID {
         try saveResult.get()
+        return UUID()
     }
 }

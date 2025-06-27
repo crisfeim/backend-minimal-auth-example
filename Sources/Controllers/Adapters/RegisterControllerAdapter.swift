@@ -1,11 +1,12 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 27/6/25.
 
+import Foundation
 import Hummingbird
 
 struct RegisterControllerAdapter: @unchecked Sendable {
-    let controller: RegisterController<User>
+    let controller: RegisterController<UUID>
     
-    init(_ controller: RegisterController<User>) {
+    init(_ controller: RegisterController<UUID>) {
         self.controller = controller
     }
     

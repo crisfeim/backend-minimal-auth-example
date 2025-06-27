@@ -1,30 +1,43 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 27/6/25.
 
-public struct LoginController {
-    private let userStore: UserStore
+
+public struct InvalidEmailError: Error {}
+public struct InvalidPasswordError: Error {}
+public struct NotFoundUserError: Error {}
+public struct IncorrectPasswordError: Error {}
+
+public struct LoginController<UserId> {
+    
+    public typealias UserFinder = (_ email: String) throws -> User?
+    public struct User {
+        fileprivate let id: UserId
+        fileprivate let hashedPassword: String
+        
+        public init(id: UserId, hashedPassword: String) {
+            self.id = id
+            self.hashedPassword = hashedPassword
+        }
+    }
+    
+    private let userFinder: UserFinder
     private let emailValidator: EmailValidator
     private let passwordValidator: PasswordValidator
-    private let tokenProvider: AuthTokenProvider
+    private let tokenProvider: AuthTokenProvider<UserId>
     private let passwordVerifier: PasswordVerifier
     
     public init(
-        userStore: UserStore,
+        userFinder: @escaping UserFinder,
         emailValidator: @escaping EmailValidator,
         passwordValidator: @escaping PasswordValidator,
-        tokenProvider: @escaping AuthTokenProvider,
+        tokenProvider: @escaping AuthTokenProvider<UserId>,
         passwordVerifier: @escaping PasswordVerifier
     ) {
-        self.userStore = userStore
+        self.userFinder = userFinder
         self.emailValidator = emailValidator
         self.passwordValidator = passwordValidator
         self.tokenProvider = tokenProvider
         self.passwordVerifier = passwordVerifier
     }
-    
-    public struct InvalidEmailError: Error {}
-    public struct InvalidPasswordError: Error {}
-    public struct NotFoundUserError: Error {}
-    public struct IncorrectPasswordError: Error {}
     
     public func login(email: String, password: String) async throws -> String {
         guard emailValidator(email) else {
@@ -35,7 +48,7 @@ public struct LoginController {
             throw InvalidPasswordError()
         }
         
-        guard let user = try userStore.findUser(byEmail: email) else {
+        guard let user = try userFinder(email) else {
             throw NotFoundUserError()
         }
         

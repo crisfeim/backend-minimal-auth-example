@@ -22,10 +22,31 @@ public enum AppComposer {
         let emailValidator: EmailValidator = { _ in true }
         let passwordValidator: PasswordValidator = { _ in true }
         
-        
-        let registerController = RegisterControllerAdapter(RegisterController(userStore: userStore, emailValidator: emailValidator, passwordValidator: passwordValidator, tokenProvider: tokenProvider.execute, passwordHasher: passwordHasher.execute))
-        
-        let loginController = LoginControllerAdapter(LoginController(userStore: userStore, emailValidator: emailValidator, passwordValidator: passwordValidator, tokenProvider: tokenProvider.execute, passwordVerifier: passwordVerifier.execute))
+    
+        let registerController = RegisterController<UUID>(
+            userMaker: { email, hashedPassword in
+                try userStore.createUser(email: email, hashedPassword: hashedPassword)
+            },
+            userExists: { email in
+               try userStore.findUser(byEmail: email) != nil
+            },
+            emailValidator: emailValidator,
+            passwordValidator: passwordValidator,
+            tokenProvider: tokenProvider.execute,
+            passwordHasher: passwordHasher.execute
+        ) |> RegisterControllerAdapter.init
+         
+        let loginController = LoginController<UUID>(
+            userFinder: { email in
+                return try userStore.findUser(byEmail: email).map {
+                    .init(id: $0.id, hashedPassword: $0.hashedPassword)
+                }
+            },
+            emailValidator: emailValidator,
+            passwordValidator: passwordValidator,
+            tokenProvider: tokenProvider.execute,
+            passwordVerifier: passwordVerifier.execute
+        ) |> LoginControllerAdapter.init
         
         let recipesController = RecipesControllerAdapter(RecipesController(store: recipeStore, tokenVerifier: tokenVerifier.execute))
         
@@ -45,4 +66,14 @@ private func .*<T>(lhs: T, rhs: (inout T) -> Void) -> T {
     var copy = lhs
     rhs(&copy)
     return copy
+}
+
+precedencegroup PipePrecedence {
+    associativity: left
+    lowerThan: LogicalDisjunctionPrecedence
+}
+
+infix operator |> : PipePrecedence
+func |><A, B>(lhs: A, rhs: (A) -> B) -> B {
+    rhs(lhs)
 }

@@ -25,8 +25,3 @@ class RecipeStoreSpy: RecipeStore {
         return try result.get()
     }
 }
-
-struct DummyUserStore: UserStore {
-    func findUser(byEmail email: String) throws -> User? {nil}
-    func createUser(id: UUID, email: String, hashedPassword: String) throws {}
-}

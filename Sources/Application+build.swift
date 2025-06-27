@@ -29,34 +29,20 @@ public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, 
         passwordVerifier: passwordVerifier.execute
     )
     
-    let router = Router()
-    router.post("/register") {
-        request,
-        context in
-        let registerRequest = try await request.decode(as: RegisterRequest.self, context: context)
-        let result = try await coordinator.register(
-            email: registerRequest.email,
-            password: registerRequest.password
-        )
-        return try ResponseGeneratorEncoder.execute(
-            TokenResponse(token: result["token"]!),
-            from: request,
-            context: context
-        )
-    }
+    let emailValidator: EmailValidator = { _ in true }
+    let passwordValidator: PasswordValidator = { _ in true }
     
-    router.post("/login") { request, context in
-        let registerRequest = try await request.decode(as: LoginRequest.self, context: context)
-        let result = try await coordinator.login(
-            email: registerRequest.email,
-            password: registerRequest.password
-        )
-        return try ResponseGeneratorEncoder.execute(
-            TokenResponse(token: result["token"]!),
-            from: request,
-            context: context
-        )
-    }
+    let userStore = CodableUserStore(storeURL: userStoreURL)
+    
+    let registerController = RegisterControllerAdapter(RegisterController(userStore: userStore, emailValidator: emailValidator, passwordValidator: passwordValidator, tokenProvider: tokenProvider.execute, passwordHasher: passwordHasher.execute))
+    
+    let loginController = LoginControllerAdapter(LoginController(userStore: userStore, emailValidator: emailValidator, passwordValidator: passwordValidator, tokenProvider: tokenProvider.execute, passwordVerifier: passwordVerifier.execute))
+    
+    let _ = RecipesController(store:  CodableRecipeStore(storeURL: recipeStoreURL), tokenVerifier: tokenVerifier.execute)
+    
+    let router = Router()
+    router.post("/register", use: registerController.handle)
+    router.post("/login", use: loginController.handle)
     
     router.post("/recipes") { request, context in
         guard let authHeader = request.headers[values: .init("Authorization")!].first,
@@ -101,3 +87,43 @@ public func makeApp(configuration: ApplicationConfiguration, userStoreURL: URL, 
     return app
 }
 
+
+struct RegisterControllerAdapter: @unchecked Sendable {
+    let controller: RegisterController
+    
+    init(_ controller: RegisterController) {
+        self.controller = controller
+    }
+    
+    func handle(request: Request, context: BasicRequestContext) async throws  -> Response {
+        let registerRequest = try await request.decode(as: RegisterRequest.self, context: context)
+        let token = try await controller.register(email: registerRequest.email, password: registerRequest.password)
+        
+        return try ResponseGeneratorEncoder.execute(
+            TokenResponse(token: token),
+            from: request,
+            context: context
+        )
+    }
+}
+
+struct LoginControllerAdapter: @unchecked Sendable   {
+    let controller: LoginController
+    
+    init(_ controller: LoginController) {
+        self.controller = controller
+    }
+    
+    func handle(request: Request, context: BasicRequestContext) async throws  -> Response {
+        let registerRequest = try await request.decode(as: LoginRequest.self, context: context)
+        let token = try await controller.login(
+            email: registerRequest.email,
+            password: registerRequest.password
+        )
+        return try ResponseGeneratorEncoder.execute(
+            TokenResponse(token: token),
+            from: request,
+            context: context
+        )
+    }
+}

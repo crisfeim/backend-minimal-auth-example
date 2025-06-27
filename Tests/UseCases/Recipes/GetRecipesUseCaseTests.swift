@@ -2,6 +2,7 @@
 
 import XCTest
 import MinimalAuthExample
+import GenericAuth
 
 class GetRecipesUseCaseTests: XCTestCase {
    

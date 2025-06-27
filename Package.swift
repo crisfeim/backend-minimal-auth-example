@@ -13,9 +13,15 @@ let package = Package(
         .package(url: "https://github.com/vapor/jwt-kit.git", from: "5.0.0"),
     ],
     targets: [
+        .target(name: "GenericAuth", dependencies: [
+            .product(name: "Hummingbird", package: "hummingbird"),
+            .product(name: "HummingbirdBcrypt", package: "hummingbird-auth"),
+            .product(name: "JWTKit", package: "jwt-kit"),
+        ]),
         .executableTarget(
             name: "MinimalAuthExample",
             dependencies: [
+                "GenericAuth",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Hummingbird", package: "hummingbird"),
                 .product(name: "HummingbirdBcrypt", package: "hummingbird-auth"),

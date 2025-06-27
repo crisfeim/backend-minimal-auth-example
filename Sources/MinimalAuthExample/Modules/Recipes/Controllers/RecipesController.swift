@@ -1,6 +1,7 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 27/6/25.
 
 import Foundation
+import GenericAuth
 
 public struct RecipesController {
     private let store: RecipeStore

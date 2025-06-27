@@ -3,13 +3,18 @@
 
 import JWTKit
 
-struct JWTPayloadData: JWTPayload, Equatable {
+public struct JWTPayloadData: JWTPayload, Equatable {
     var subject: SubjectClaim
-    var expiration: ExpirationClaim
-    // Define additional JWT Attributes here
-    var email: String
+    private var expiration: ExpirationClaim
+    private var email: String
+    
+    public init(subject: SubjectClaim, expiration: ExpirationClaim, email: String) {
+        self.subject = subject
+        self.expiration = expiration
+        self.email = email
+    }
 
-    func verify(using algorithm: some JWTAlgorithm) async throws {
+    public func verify(using algorithm: some JWTAlgorithm) async throws {
         try self.expiration.verifyNotExpired()
     }
 }

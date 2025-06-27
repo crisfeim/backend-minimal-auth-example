@@ -2,6 +2,7 @@ import MinimalAuthExample
 import Hummingbird
 import HummingbirdTesting
 import XCTest
+import GenericAuth
 
 final class AppTests: XCTestCase, @unchecked Sendable {
     

@@ -2,18 +2,21 @@
 
 import Foundation
 import Hummingbird
+import GenericAuth
 
-struct RegisterControllerAdapter: @unchecked Sendable {
-    let controller: RegisterController<UUID>
+struct LoginControllerAdapter: @unchecked Sendable   {
+    let controller: LoginController<UUID>
     
-    init(_ controller: RegisterController<UUID>) {
+    init(_ controller: LoginController<UUID>) {
         self.controller = controller
     }
     
     func handle(request: Request, context: BasicRequestContext) async throws  -> Response {
-        let registerRequest = try await request.decode(as: RegisterRequest.self, context: context)
-        let token = try await controller.register(email: registerRequest.email, password: registerRequest.password)
-        
+        let registerRequest = try await request.decode(as: LoginRequest.self, context: context)
+        let token = try await controller.login(
+            email: registerRequest.email,
+            password: registerRequest.password
+        )
         return try ResponseGeneratorEncoder.execute(
             TokenResponse(token: token),
             from: request,

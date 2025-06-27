@@ -49,7 +49,7 @@ class LoginControllerTests: XCTestCase {
         XCTAssertEqual(token, "any-provided-token")
     }
     
-    func test_login_passesPasswordToPasswordValidator() async throws {
+    func test_login_passwordIsValidatedWithPasswordValidator() async throws {
         var password: String?
         let sut = makeSUT(passwordValidator: {
             password = $0
@@ -60,7 +60,7 @@ class LoginControllerTests: XCTestCase {
         XCTAssertEqual(password, "any password")
     }
     
-    func test_login_passesEmailToEmailValidator() async throws {
+    func test_login_emailIsValidatedWithEmailValidator() async throws {
         var email: String?
         let sut = makeSUT(emailValidator: {
             email = $0

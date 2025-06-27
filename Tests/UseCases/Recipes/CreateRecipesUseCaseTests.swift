@@ -3,8 +3,6 @@
 import XCTest
 import MinimalAuthExample
 
-
-
 class CreateRecipesUseCaseTests: XCTestCase {
     func test_postRecipe_deliversErrorOnStoreError() async throws {
         let store = RecipeStoreStub(result: .failure(anyError()))
